@@ -110,27 +110,30 @@ void Grille::eraseCaptor(int index)
 	nbCapteurs--;
 	capteurs.reset(index);
 	couvert.reset(index);
-	for(auto k=coverGraph[index].begin(); k!=coverGraph[index].end(); k++)
+	for(auto k=coverGraph[index].begin(); k!=coverGraph[index].end();)
 	{
 		if(capteurs.test(*k))
-		couvert.set(index);
+		{
+			couvert.set(index);
+			k++;
+		}
 		else
 		{
 			coverGraph[*k].remove(index);
 			if(coverGraph[*k].empty())
 			couvert.reset(*k);
-			coverGraph[index].remove(*k);
-			k--;
+			k=coverGraph[index].erase(k);
 		}
+
 	}
-	for(auto k=connectGraph[index].begin(); k!=connectGraph[index].end(); k++)
+	for(auto k=connectGraph[index].begin(); k!=connectGraph[index].end();)
 	{
 		connectGraph[*k].remove(index);
-		connectGraph[index].remove(*k);
-		k--;
+		k=connectGraph[index].erase(k);
 	}
 	connecte.reset();
 	connect(0);
+
 }
 
 void Grille::connect(int index)
@@ -188,39 +191,5 @@ for(int i=1; i<taille*taille; i++)
 	if(!estRealisable())
 	addCaptor(i);
 }
-/*eraseCaptor(1);
-eraseCaptor(2);
-cout<<toString()<<endl;*/
-	/*cout<<"Initialisation ok"<<endl;
 
-	for(int i=0; i<taille; i++)
-	for(int j=0; j<taille; j++)
-	if(!couvert[i*taille+j])
-	addCaptor(i,j);
-	cout<<"Etape 1 ok"<<endl;
-
-
-	for(int i=0; i<taille; i++){
-		for(int j=0; j<taille; j++){
-			if(capteurs[i*taille+j] && !connecte[i*taille+j]){
-				pair<int,int> p=plusProcheConnecte(i, j);
-				int k=p.first;
-				int l=p.second;
-				float dist=sqrt((i-k)*(i-k)+(j-l)*(j-l));
-				int nbCaptManquants=(int)dist/rCom;
-				int d=1;
-				//on rajoute des capteurs entre (i,j) et (k,l) afin que les deux puissent communiquer
-				while(d<=nbCaptManquants && !connecte[i*taille+j]){
-
-					int n=(int)(k*d/nbCaptManquants+i*(nbCaptManquants-d)/nbCaptManquants);
-					int m=(int)(l*d/nbCaptManquants+j*(nbCaptManquants-d)/nbCaptManquants);
-					addCaptor(n,m);
-					d++;
-				}
-			}
-		}
-	}
-	cout<<"Etape 2 ok"<<endl;
-	eraseCaptor(6,3);
-	eraseCaptor(7,6);*/
 }
