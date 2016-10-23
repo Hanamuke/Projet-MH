@@ -8,41 +8,33 @@ array<bitset<2500>,2500> Grille::couvertMatrix;
 array<bitset<2500>,2500> Grille::connecteMatrix;
 array<list<uint16_t>,2500> Grille::coverNeighGraph;
 array<list<uint16_t>,2500> Grille::connectNeighGraph;
-//bitset<2500> Grille::maskMatrix;
+bitset<2500> Grille::maskMatrix;
 
 Grille::Grille(int t, int _rCapt, int _rCom):taille(t),rCapt(_rCapt),rCom(_rCom){
 	nbCapteurs=0;
 	if(!matrixInitialized){
 		for(int i=0; i<t; i++)
 		for(int j=0; j<t; j++){
+			if(i+j!=0)
+			maskMatrix.set(taille*i+j);
 			for(int k=0; k<t; k++)
 			for(int l=0; l<t; l++){
 				if((k-i)*(k-i)+(l-j)*(l-j)<=rCapt*rCapt){
-					couvertMatrix[taille*i+j][t*k+l]=true;
+					couvertMatrix[taille*i+j].set(t*k+l);
 					if(k!=i || l!=j)
 					coverNeighGraph[i*t+j].push_back(t*k+l);
 				}
 				if((k-i)*(k-i)+(l-j)*(l-j)<=rCom*rCom && (i!=k || j!=l)){
-					connecteMatrix[t*i+j][t*k+l]=true;
+					connecteMatrix[t*i+j].set(t*k+l);
 					connectNeighGraph[i*t+j].push_back(t*k+l);
 				}
 
 			}
-			//maskMatrix[taille*i+j]=true;
 		}
 		matrixInitialized=true;
 	}
-	for(int i=0; i<t; i++){
-		for(int j=0; j<t; j++){
-			/*couvert[i*t+j]=false;
-			capteurs[i*t+j]=false;
-			connecte[i*t+j]=false;*/
-			connectGraph[i*t+j].resize(connectNeighGraph[i*t+j].size());
-			coverGraph[i*t+j].resize(coverNeighGraph[i*t+j].size());
-		}
-	}
-	couvert[0]=true;
-	connecte[0]=true;
+	couvert.set(0);
+	connecte.set(0);
 }
 
 bool Grille::estCouvert(int i, int j) const{
@@ -88,17 +80,16 @@ void Grille::addCaptor(int index)
 	for(auto k=coverNeighGraph[index].begin(); k!=coverNeighGraph[index].end(); k++)
 	{
 		if(!capteurs.test(*k)){
-			coverGraph[index].push_back(pair<void*,uint16_t>(coverGraph[*k].end(),*k));
-			coverGraph[*k].push_back(pair<void*,uint16_t>(coverGraph[index].end()-1,index));
+			coverGraph[index].push_front(*k);
+			coverGraph[*k].push_front(index);
 		}
 	}
 	bool co=false;
 	for(auto k=connectNeighGraph[index].begin(); k!=connectNeighGraph[index].end(); k++)
 	{
 		if(capteurs.test(*k)||*k==0){
-			connectGraph[index].push_back(pair<void*,uint16_t>(connectGraph[*k].end(),*k));
-			connectGraph[*k].push_back(pair<void*,uint16_t>(connectGraph[index].end()-1,index));
-
+			connectGraph[index].push_front(*k);
+			connectGraph[*k].push_front(index);
 			if(connecte.test(*k))
 			co=true;
 		}
@@ -107,13 +98,48 @@ void Grille::addCaptor(int index)
 	connect(index);
 }
 
+void Grille::eraseCaptor(int i, int j)
+{
+	eraseCaptor(taille*i+j);
+}
+
+void Grille::eraseCaptor(int index)
+{
+	if(!capteurs.test(index))
+	return;
+	nbCapteurs--;
+	capteurs.reset(index);
+	couvert.reset(index);
+	for(auto k=coverGraph[index].begin(); k!=coverGraph[index].end(); k++)
+	{
+		if(capteurs.test(*k))
+		couvert.set(index);
+		else
+		{
+			coverGraph[*k].remove(index);
+			if(coverGraph[*k].empty())
+			couvert.reset(*k);
+			coverGraph[index].remove(*k);
+			k--;
+		}
+	}
+	for(auto k=connectGraph[index].begin(); k!=connectGraph[index].end(); k++)
+	{
+		connectGraph[*k].remove(index);
+		connectGraph[index].remove(*k);
+		k--;
+	}
+	connecte.reset();
+	connect(0);
+}
+
 void Grille::connect(int index)
 {
 	if(connecte.test(index))
 	return;
 	connecte.set(index);
 	for(auto k=connectGraph[index].begin(); k!=connectGraph[index].end(); k++)
-	connect(k->second);
+	connect(*k);
 
 }
 
@@ -123,6 +149,13 @@ string Grille::toString() const
 	for(int i=0; i<taille; i++){
 		for(int j=0; j<taille; j++){
 			ret+=capteurs[i*taille+j]?"1 ":"0 ";
+		}
+		ret+='\n';
+	}
+	ret+="Zone couverte\n";
+	for(int i=0; i<taille; i++){
+		for(int j=0; j<taille; j++){
+			ret+=couvert[i*taille+j]?"1 ":"0 ";
 		}
 		ret+='\n';
 	}
@@ -147,8 +180,18 @@ string Grille::toString() const
 }
 
 void Grille::rendRealisable(){
-
-	cout<<"Initialisation ok"<<endl;
+for(int i=1; i<taille*taille; i++)
+addCaptor(i);
+for(int i=1; i<taille*taille; i++)
+{
+	eraseCaptor(i);
+	if(!estRealisable())
+	addCaptor(i);
+}
+/*eraseCaptor(1);
+eraseCaptor(2);
+cout<<toString()<<endl;*/
+	/*cout<<"Initialisation ok"<<endl;
 
 	for(int i=0; i<taille; i++)
 	for(int j=0; j<taille; j++)
@@ -177,6 +220,7 @@ void Grille::rendRealisable(){
 			}
 		}
 	}
-
 	cout<<"Etape 2 ok"<<endl;
+	eraseCaptor(6,3);
+	eraseCaptor(7,6);*/
 }
