@@ -2,10 +2,13 @@
 #include <algorithm>
 #include <math.h>
 #include <iostream>
+#include <algorithm>
+#include <ctime>
+#include <cstdlib>
+#include "GreedyList.hpp"
 
 bool Grille::matrixInitialized=false;
 array<bitset<2500>,2500> Grille::couvertMatrix;
-array<bitset<2500>,2500> Grille::connecteMatrix;
 array<list<uint16_t>,2500> Grille::coverNeighGraph;
 array<list<uint16_t>,2500> Grille::connectNeighGraph;
 bitset<2500> Grille::maskMatrix;
@@ -25,7 +28,6 @@ Grille::Grille(int t, int _rCapt, int _rCom):taille(t),rCapt(_rCapt),rCom(_rCom)
 					coverNeighGraph[i*t+j].push_back(t*k+l);
 				}
 				if((k-i)*(k-i)+(l-j)*(l-j)<=rCom*rCom && (i!=k || j!=l)){
-					connecteMatrix[t*i+j].set(t*k+l);
 					connectNeighGraph[i*t+j].push_back(t*k+l);
 				}
 
@@ -35,6 +37,18 @@ Grille::Grille(int t, int _rCapt, int _rCom):taille(t),rCapt(_rCapt),rCom(_rCom)
 	}
 	couvert.set(0);
 	connecte.set(0);
+}
+
+void Grille::reset()
+{
+	matrixInitialized=false;
+	for(int i=0; i<2500; i++)
+	{
+		coverNeighGraph[i].clear();
+		connectNeighGraph[i].clear();
+		couvertMatrix[i].reset();
+	}
+	maskMatrix.reset();
 }
 
 bool Grille::estCouvert(int i, int j) const{
@@ -56,7 +70,6 @@ void Grille::addCaptor(int index)
 	nbCapteurs++;
 	capteurs.set(index);
 	couvert|=couvertMatrix[index];
-	//j'utilise des pointeur qui s'entrepointent pour plus de vitesse mais je te conseille de pas trop y toucher
 	for(auto k=coverNeighGraph[index].begin(); k!=coverNeighGraph[index].end(); k++)
 	{
 		if(!capteurs.test(*k)){
@@ -118,12 +131,22 @@ void Grille::eraseCaptor(int index)
 
 void Grille::connect(int index)
 {
-	if(connecte.test(index))
-	return;
 	connecte.set(index);
 	for(auto k=connectGraph[index].begin(); k!=connectGraph[index].end(); k++)
+	if(!connecte.test(*k))
 	connect(*k);
+}
 
+void Grille::fill()
+{
+	nbCapteurs=taille*taille-1;
+	capteurs=maskMatrix;
+	connecte=maskMatrix;
+	couvert=maskMatrix;
+	couvert.set(0);
+	connecte.set(0);
+	coverGraph=coverNeighGraph;
+	connectGraph=coverNeighGraph;
 }
 
 string Grille::toString() const
@@ -157,21 +180,22 @@ string Grille::toString() const
 		ret+='\n';
 	}
 	ret+=estRealisable()?"La solution est réalisable.\n":"La solution n'est pas réalisable.\n";
-	//ret+=to_string(nbCapteurs);
+	ret+=to_string(nbCapteurs);
 	ret+=" capteurs sont utilisés.";
 	return ret;
 }
 
 void Grille::rendRealisable(){
-	for(int i=1; i<taille*taille; i++)
-	addCaptor(i);
-	for(int i=1; i<taille*taille; i++)
+	vector<int> permutation(taille*taille-1);
+	for(int i=0; i<taille*taille-1; i++)
+	permutation[i]=((i+1)*7)%(taille*taille);
+	fill();
+	for(auto i= permutation.begin(); i!=permutation.end(); i++)
 	{
-		eraseCaptor(i);
+		eraseCaptor(*i);
 		if(!estRealisable())
-		addCaptor(i);
+		addCaptor(*i);
 	}
-
 }
 
 
@@ -194,7 +218,7 @@ void Grille::randomDelete(int n){
 
 
 void Grille::compConnexe(bitset<2500>& ciblesReliees, bitset<2500>& capteursReliees, int index){
-	
+
 	if(capteursReliees.test(index))
 	return;
 	capteursReliees.set(index);
@@ -212,13 +236,13 @@ void Grille::augmenteDistance(bitset<2500>& bi){
 			int l=iter/taille;
 			int c=iter%taille;
 			if(l-1>=0)
-				bi.set((l-1)*taille+c);
+			bi.set((l-1)*taille+c);
 			if(l+1<taille)
-				bi.set((l+1)*taille+c);
+			bi.set((l+1)*taille+c);
 			if(c-1>=0)
-				bi.set(l*taille+c-1);
+			bi.set(l*taille+c-1);
 			if(c+1<taille)
-				bi.set(l*taille+c+1);
+			bi.set(l*taille+c+1);
 		}
 	}
 }
@@ -248,13 +272,13 @@ void Grille::ajouteCapteursPourRelier(int l1, int c1, int l2, int c2){
 				}
 			}
 			if(aDroite)
-				newC--;
+			newC--;
 			else
-				newL--;
+			newL--;
 
 			addCaptor(newL, newC);
 			if((newL-l2)*(newL-l2)+(newC-c2)*(newC-c2)>rCom)
-				return ajouteCapteursPourRelier(newL, newC, l2, c2);
+			return ajouteCapteursPourRelier(newL, newC, l2, c2);
 			return;
 		}
 		else{
@@ -280,76 +304,76 @@ void Grille::ajouteCapteursPourRelier(int l1, int c1, int l2, int c2){
 				}
 			}
 			if(aGauche)
-				newC++;
+			newC++;
 			else
-				newL--;
+			newL--;
 
 
 			addCaptor(newL, newC);
 			if((newL-l2)*(newL-l2)+(newC-c2)*(newC-c2)>rCom)
-				return ajouteCapteursPourRelier(newL, newC, l2, c2);
+			return ajouteCapteursPourRelier(newL, newC, l2, c2);
 			return;
-		
+
 		}
 	}
 	else
-		return ajouteCapteursPourRelier(l2, c2, l1, c1);
+	return ajouteCapteursPourRelier(l2, c2, l1, c1);
 }
 
 
 void Grille::transRealisable(){
 	for(int i=1; i<taille*taille; i++){
-			if(!couvert[i])
-				addCaptor(i);
+		if(!couvert[i])
+		addCaptor(i);
 	}
 
 
 	for(int i=0; i<taille*taille; i++){
-			if(((~connecte)&capteurs)[i]){
-					
-				// bi est le bitset des capteurs qui sont dans la meme composante connexe
-				bitset<2500> bi;
-				bi.reset();
-				bitset<2500> ciblesReliees;
-				ciblesReliees.reset();
-				compConnexe(ciblesReliees, bi, i);					
-				
-				//bi devient le bitset des capteurs qui ne sont pas dans la composante connexe
-				bi=capteurs&(~bi);
-				int dist=rCom;
-				while((bi&ciblesReliees).none()){
-					dist++;
-					augmenteDistance(ciblesReliees);
+		if(((~connecte)&capteurs)[i]){
+
+			// bi est le bitset des capteurs qui sont dans la meme composante connexe
+			bitset<2500> bi;
+			bi.reset();
+			bitset<2500> ciblesReliees;
+			ciblesReliees.reset();
+			compConnexe(ciblesReliees, bi, i);
+
+			//bi devient le bitset des capteurs qui ne sont pas dans la composante connexe
+			bi=capteurs&(~bi);
+			int dist=rCom;
+			while((bi&ciblesReliees).none()){
+				dist++;
+				augmenteDistance(ciblesReliees);
+			}
+
+			int indexAutreComp=0;
+			while(!(bi&ciblesReliees).test(indexAutreComp))
+			indexAutreComp++;
+			int lAutreComp=indexAutreComp/taille;
+			int cAutreComp=indexAutreComp%taille;
+			int lCetteComp=max(0,lAutreComp-dist);
+			int cCetteComp=max(0,cAutreComp-dist);
+			bi=capteurs&(~bi);
+
+
+
+			while(lCetteComp<=min(taille-1,lAutreComp+dist) && !(bi.test(lCetteComp*taille+cCetteComp))){
+				while(cCetteComp<=min(taille-1,cAutreComp+dist) && !(bi.test(lCetteComp*taille+cCetteComp)))
+				cCetteComp++;
+
+				if( !(bi.test(lCetteComp*taille+cCetteComp)) ){
+					cCetteComp=max(0,cAutreComp-dist);
+					lCetteComp++;
 				}
-					
-				int indexAutreComp=0;
-				while(!(bi&ciblesReliees).test(indexAutreComp))
-					indexAutreComp++;
-				int lAutreComp=indexAutreComp/taille;
-				int cAutreComp=indexAutreComp%taille;
-				int lCetteComp=max(0,lAutreComp-dist);
-				int cCetteComp=max(0,cAutreComp-dist);
-				bi=capteurs&(~bi);
+			}
 
-				
 
-				while(lCetteComp<=min(taille-1,lAutreComp+dist) && !(bi.test(lCetteComp*taille+cCetteComp))){	
-					while(cCetteComp<=min(taille-1,cAutreComp+dist) && !(bi.test(lCetteComp*taille+cCetteComp)))
-						cCetteComp++;
-		
-					if( !(bi.test(lCetteComp*taille+cCetteComp)) ){
-						cCetteComp=max(0,cAutreComp-dist);
-						lCetteComp++;
-					}	
-				}
+			ajouteCapteursPourRelier(lCetteComp, cCetteComp, lAutreComp, cAutreComp);
+			if(connecte.test(lAutreComp*taille+cAutreComp))
+			connect(lCetteComp*taille+cCetteComp);
 
-		
-				ajouteCapteursPourRelier(lCetteComp, cCetteComp, lAutreComp, cAutreComp);
-				if(connecte.test(lAutreComp*taille+cAutreComp))
-					connect(lCetteComp*taille+cCetteComp);
-					
-					
-					
+
+
 		}
 	}
 
@@ -362,8 +386,84 @@ void Grille::combineHeur(){
 		if(capteurs.test(i)){
 			eraseCaptor(i);
 			if(!estRealisable())
-				addCaptor(i);
+			addCaptor(i);
 		}
 	}
 
+}
+
+void Grille::neighImprove()
+{
+	int best_score=nbCapteurs;
+	if(!estRealisable())
+	return;
+	list<int> permutation;
+	GreedyList<list<int>::iterator> capt;
+	GreedyList<list<int>::iterator> temp;
+	capt.resize(taille*taille-1);
+	temp.resize(taille*taille-1);
+	for(int i=1; i<taille*taille; i++)
+	if(!capteurs.test(i))
+	{
+		permutation.push_back(i);
+	}
+	for(int i=1; i<taille*taille; i++)
+	if(capteurs.test(i))
+	{
+		permutation.push_back(i);
+	}
+	Grille g(taille, rCapt,rCom);
+	int cnt;
+	list<int>::iterator l;
+	for(l=permutation.begin(),cnt=0; l!=permutation.end(); l++, cnt++)
+	{
+		if(cnt>=taille*taille-1-nbCapteurs)
+		capt.push_back(l);
+	}
+	cnt=0;
+	auto k=capt.begin();
+	while(true)
+	{
+
+		int value=*(*k);
+		*k=permutation.erase(*k);
+		permutation.push_front(value);
+		g.fill();
+		for(auto i= permutation.begin(); i!=permutation.end(); i++)
+		{
+			g.eraseCaptor(*i);
+			if(!g.estRealisable())
+			{
+				temp.push_back(i);
+				g.addCaptor(*i);
+			}
+		}
+		if(g.getNbCapteurs()<best_score)
+		{
+			capt=temp;
+			best_score=g.getNbCapteurs();
+			*this=g;
+			k=capt.begin();
+			cout<<"New best:"<<best_score<<endl;
+			cnt=0;
+			cout<<toString()<<endl;
+			cin.get();
+		}
+		else
+		{
+			cnt++;
+			//cout<<"unsuccessful : "<<cnt<<"/"<<best_score<<" : "<<g.getNbCapteurs()<<endl;
+			if(cnt==best_score)
+			{
+				k=capt.end();
+				l=permutation.end();
+				return;
+			}
+
+			permutation.pop_front();
+			permutation.insert(*k,value);
+			k++;
+		}
+		temp.clear();
+	}
 }
