@@ -11,8 +11,7 @@ private:
 	int nbCapteurs;
 	const int taille, rCapt, rCom;
 
-	static array<bitset<2500>,2500> couvertMatrix;
-	static array<bitset<2500>,2500> connecteMatrix;
+	static array<bitset<2500>,2500> couvertMatrix;;
 	static array<list<uint16_t>,2500> coverNeighGraph;
 	static array<list<uint16_t>,2500> connectNeighGraph;
 	static bitset<2500> maskMatrix;
@@ -23,13 +22,14 @@ private:
 	bitset<2500> capteurs;
 	//0 si le capteur n'est pas connecte au puit ou n'existe pas, 1 sinon
 	bitset<2500> connecte;
-	//chaque liste est une liste des arretes du sommet, le void* pointe vers l'autre bout de l'arrete correspondante (c'est coton), le int est l'index du sommet vers lequel l'arete pointe.
 	array<list<uint16_t>,2500> coverGraph;
 	array<list<uint16_t>,2500> connectGraph;
 
 
 public:
 	Grille(int t, int _rCapt, int _rCom);
+	//remplie la grille de capteurs.
+	void fill();
 	int getNbCapteurs(){return nbCapteurs;}
 	// getter qui renvoie la case (i,j) de couvert
 	bool estCouvert(int i, int j) const;
@@ -48,5 +48,19 @@ public:
 	void connect(int index);
 	//Retourne les coordonnées du plus proche capteur connecté au puit
 	pair<int,int> plusProcheConnecte(int i, int j);
+	void neighImprove();
+
+	Grille& operator=(Grille &arg) // copy/move constructor is called to construct arg
+	{
+		couvert=arg.couvert;
+		capteurs=arg.capteurs;
+		connecte=arg.connecte;
+		coverGraph=arg.coverGraph;
+		connectGraph=arg.connectGraph;
+		nbCapteurs=arg.nbCapteurs;
+	    return *this;
+	}
+
 	string toString() const;
+	static void reset();
 };

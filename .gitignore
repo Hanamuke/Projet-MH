@@ -1,0 +1,7 @@
+*.o
+*.ods
+depend-MH
+main.cpp
+Makefile
+*.exe
+out.txt
