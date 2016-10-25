@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 	cout<<"Temps : "<<(float)(t2-t1)/CLOCKS_PER_SEC<<endl;
 	cout<<endl;
 	out5<<g3.toString();
-	
+
 
 	fstream out3;
     out3.open("out3.txt",fstream::trunc|fstream::out);
