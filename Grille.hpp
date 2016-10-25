@@ -65,8 +65,13 @@ public:
 	void neighImprove();
 	//Recherche une meilleure solution dans un voisinage ou on a flip une  ligne ou une colonne
 	void voisinageLigneEtColonne();
+	void voisinageDeuxLigneEtColonne();
+	void voisinageTroisLigneEtColonne();
+	//Recherche une meilleure solution dans un voisinage 2 flip et s'arrete à la premiere amélioration
+	void voisDeuxLigneEtColonnePourVND();
+	void VND();
 	void flipColonneOuLigne(bool colonne, int n);
-
+	
 
 	Grille& operator=(Grille &arg) // copy/move constructor is called to construct arg
 	{

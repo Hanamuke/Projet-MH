@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 	fstream out3;
     out3.open("out3.txt",fstream::trunc|fstream::out);
 	t1=clock();
-	g3.voisinageLigneEtColonne();
+	g3.VND();
 	t2=clock();
 	cout<<"Borne sup amelioree:"<<g3.getNbCapteurs()<<endl;
 	cout<<"Temps 2: "<<(float)(t2-t1)/CLOCKS_PER_SEC<<endl;
