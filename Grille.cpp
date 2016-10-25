@@ -358,7 +358,7 @@ void Grille::transRealisable(){
 			if(!couvert[i]){
 				if(rCapt==1 && rCom==1 && taille==10)
 					addCaptor(i);
-				else	
+				else
 					ajouteCapteursPourCouvrir(i);
 			}
 	}
@@ -366,14 +366,14 @@ void Grille::transRealisable(){
 
 	for(int i=0; i<taille*taille; i++){
 			if(((~connecte)&capteurs)[i]){
-					
+
 				// bi est le bitset des capteurs qui sont dans la meme composante connexe
 				bitset<2500> bi;
 				bi.reset();
 				bitset<2500> ciblesReliees;
 				ciblesReliees.reset();
-				compConnexe(ciblesReliees, bi, i);					
-				
+				compConnexe(ciblesReliees, bi, i);
+
 				//bi devient le bitset des capteurs qui ne sont pas dans la composante connexe
 				bi=capteurs&(~bi);
 				int dist=rCom;
@@ -381,7 +381,7 @@ void Grille::transRealisable(){
 					dist++;
 					augmenteDistance(ciblesReliees);
 				}
-					
+
 				int indexAutreComp=0;
 				while(!(bi&ciblesReliees).test(indexAutreComp))
 					indexAutreComp++;
@@ -391,25 +391,25 @@ void Grille::transRealisable(){
 				int cCetteComp=max(0,cAutreComp-dist);
 				bi=capteurs&(~bi);
 
-				
 
-				while(lCetteComp<=min(taille-1,lAutreComp+dist) && !(bi.test(lCetteComp*taille+cCetteComp))){	
+
+				while(lCetteComp<=min(taille-1,lAutreComp+dist) && !(bi.test(lCetteComp*taille+cCetteComp))){
 					while(cCetteComp<=min(taille-1,cAutreComp+dist) && !(bi.test(lCetteComp*taille+cCetteComp)))
 						cCetteComp++;
-		
+
 					if( !(bi.test(lCetteComp*taille+cCetteComp)) ){
 						cCetteComp=max(0,cAutreComp-dist);
 						lCetteComp++;
-					}	
+					}
 				}
 
-		
+
 				ajouteCapteursPourRelier(lCetteComp, cCetteComp, lAutreComp, cAutreComp);
 				if(connecte.test(lAutreComp*taille+cAutreComp))
 					connect(lCetteComp*taille+cCetteComp);
-					
-					
-					
+
+
+
 		}
 	}
 
@@ -430,56 +430,43 @@ void Grille::combineHeur(){
 
 void Grille::neighImprove()
 {
-	int best_score=nbCapteurs;
+	int best_score=nbCapteurs, cntcapt=0, cntempty=0;
 	if(!estRealisable())
 	return;
-	list<int> permutation;
-	GreedyList<list<int>::iterator> capt;
-	GreedyList<list<int>::iterator> temp;
+	vector<int> capt;
 	capt.resize(taille*taille-1);
-	temp.resize(taille*taille-1);
+	vector<int> temp_capt;
+	temp_capt.resize(taille*taille-1);
+	vector<int> empty;
+	empty.resize(taille*taille-1);
+	vector<int> temp_empty;
+	temp_empty.resize(taille*taille-1);
 	for(int i=1; i<taille*taille; i++)
 	if(!capteurs.test(i))
 	{
-		permutation.push_back(i);
+		empty[cntempty]=i;
+		cntempty++;
 	}
 	for(int i=1; i<taille*taille; i++)
 	if(capteurs.test(i))
 	{
-		permutation.push_back(i);
+		capt[cntcapt]=i;
+		cntcapt++;
 	}
 	Grille g(taille, rCapt,rCom);
-	int cnt;
-	list<int>::iterator l;
-	for(l=permutation.begin(),cnt=0; l!=permutation.end(); l++, cnt++)
+	int cnt=0;
+	int k=capt[cnt];
+	while(k!=0)
 	{
-		if(cnt>=taille*taille-1-nbCapteurs)
-		capt.push_back(l);
-	}
-	cnt=0;
-	auto k=capt.begin();
-	while(true)
-	{
-
-		int value=*(*k);
-		*k=permutation.erase(*k);
-		permutation.push_front(value);
-		g.fill();
-		for(auto i= permutation.begin(); i!=permutation.end(); i++)
-		{
-				g.eraseCaptor(*i);
-				if(!g.estRealisable())
-				{
-					temp.push_back(i);
-					g.addCaptor(*i);
-				}
-		}
+		g.pivotDestructeur(capt,empty,temp_capt,temp_empty,k);
 		if(g.getNbCapteurs()<best_score)
 		{
-			capt=temp;
+			capt=temp_capt;
+			empty=temp_empty;
 			best_score=g.getNbCapteurs();
 			*this=g;
-			k=capt.begin();
+			k=capt[0];
+			cout<<"test "<<k<<endl;
 			cout<<"New best:"<<best_score<<endl;
 			cnt=0;
 			//cout<<toString()<<endl;
@@ -490,17 +477,9 @@ void Grille::neighImprove()
 			cnt++;
 			//cout<<"unsuccessful : "<<cnt<<"/"<<best_score<<" : "<<g.getNbCapteurs()<<endl;
 			if(cnt==best_score)
-			{
-				k=capt.end();
-				l=permutation.end();
-				return;
-			}
-
-			permutation.pop_front();
-			permutation.insert(*k,value);
-			k++;
+			return;
+			k=capt[cnt];
 		}
-		temp.clear();
 	}
 }
 
@@ -558,6 +537,118 @@ void Grille::voisinageLigneEtColonne(){
 				g3=g2;
 			g2=*this;
 	}
-	
+
 	*this=g3;
+}
+
+void Grille::pivotDestructeur(vector<int> const & capt, vector<int> const & empty, vector<int> & new_capt, vector<int> & new_empty, int pivot)
+{
+	fill();
+	std::fill(new_capt.begin(), new_capt.end(), 0);
+	std::fill(new_empty.begin(), new_empty.end(), 0);
+	eraseCaptor(pivot);
+	new_empty[0]=pivot;
+	int cntcapt=0, cntempty=1;
+	for(int i=0; empty[i]!=0; i++)
+	{
+			eraseCaptor(empty[i]);
+			if(!estRealisable())
+			{
+				new_capt[cntcapt]=empty[i];
+				cntcapt++;
+				addCaptor(empty[i]);
+			}
+			else
+			{
+				new_empty[cntempty]=empty[i];
+				cntempty++;
+			}
+	}
+	for(int i=0; capt[i]!=0; i++)
+	{
+		if(capt[i]!=pivot)
+		{
+			eraseCaptor(capt[i]);
+			if(!estRealisable())
+			{
+				new_capt[cntcapt]=capt[i];
+				cntcapt++;
+				addCaptor(capt[i]);
+			}
+			else
+			{
+				new_empty[cntempty]=capt[i];
+				cntempty++;
+			}
+		}
+	}
+}
+
+void Grille::recuitSimule()
+{
+	Grille gbest(taille, rCapt,rCom);
+	double rho=0.85;
+	double T=0.1*nbCapteurs/50;
+	int k=nbCapteurs/0.2;
+	int best_score=nbCapteurs;
+	int last_score=best_score,cntcapt=0, cntempty=0, last_iter_score=best_score;
+	if(!estRealisable())
+	return;
+	vector<int> capt;
+	capt.resize(taille*taille-1);
+	vector<int> temp_capt;
+	temp_capt.resize(taille*taille-1);
+	vector<int> empty;
+	empty.resize(taille*taille-1);
+	vector<int> temp_empty;
+	temp_empty.resize(taille*taille-1);
+	for(int i=1; i<taille*taille; i++)
+	if(!capteurs.test(i))
+	{
+		empty[cntempty]=i;
+		cntempty++;
+	}
+	for(int i=1; i<taille*taille; i++)
+	if(capteurs.test(i))
+	{
+		capt[cntcapt]=i;
+		cntcapt++;
+	}
+	Grille g(taille, rCapt,rCom);
+	int cnt=0;
+	while(cnt<5-taille/10)
+	{
+		k=nbCapteurs/0.2;
+		for(int i=0; i<k; i++)
+		{
+			int pivot=rand()%nbCapteurs;
+			random_shuffle(empty.begin(),empty.begin()+taille*taille-1-nbCapteurs);
+			g.pivotDestructeur(capt,empty,temp_capt,temp_empty,capt[pivot]);
+			double lambda=exp((double)(last_score-g.getNbCapteurs())/T);
+			int p=100*lambda;
+
+			if(rand()%100<p)
+			{
+				capt=temp_capt;
+				empty=temp_empty;
+				*this=g;
+				last_score=g.getNbCapteurs();
+				if(last_score<best_score)
+				{
+					best_score=last_score;
+					cout<<"new best"<<best_score<<endl;
+					gbest=g;
+				}
+			}
+		}
+		if(last_iter_score!=last_score)
+		cnt=0;
+		else
+		cnt++;
+		last_iter_score=last_score;
+		T*=rho;
+		cout<<"T="<<T<<endl;
+		cout<<"current score"<<last_score<<endl;
+	}
+	*this=gbest;
 }

@@ -66,7 +66,7 @@ public:
 	//Recherche une meilleure solution dans un voisinage ou on a flip une  ligne ou une colonne
 	void voisinageLigneEtColonne();
 	void flipColonneOuLigne(bool colonne, int n);
-
+	void pivotDestructeur(vector<int> const & capt, vector<int> const & empty, vector<int> & new_capt, vector<int> & new_empty, int pivot);
 
 	Grille& operator=(Grille &arg) // copy/move constructor is called to construct arg
 	{
@@ -78,7 +78,8 @@ public:
 		nbCapteurs=arg.nbCapteurs;
 	    return *this;
 	}
-
+	//recuit simulé sur l'heuristique destrcutive.
+	void recuitSimule();
 	string toString() const;
 	static void reset();
 
