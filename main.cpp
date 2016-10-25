@@ -18,43 +18,29 @@ int main(int argc, char* argv[])
 
 
 
-	fstream out2;
-    out2.open("out2.txt",fstream::trunc|fstream::out);
-	Grille g2(t, rCapt, rCom);
-	t1=clock();
-	g2.rendRealisable();
-	t2=clock();
-	cout<<"Borne sup heur 1: "<<g2.getNbCapteurs()<<endl;
-	cout<<"Deuxieme temps : "<<(float)(t2-t1)/CLOCKS_PER_SEC<<endl;
-	cout<<endl;
-	out2<<g2.toString();
-
-
 	fstream out5;
-    out5.open("out5.txt",fstream::trunc|fstream::out);
+	out5.open("out5.txt",fstream::trunc|fstream::out);
 	Grille g3(t, rCapt, rCom);
 	t1=clock();
 	g3.combineHeur();
 	t2=clock();
-	cout<<"Borne sup heur 3: "<<g3.getNbCapteurs()<<endl;
-	cout<<"Troisieme temps : "<<(float)(t2-t1)/CLOCKS_PER_SEC<<endl;
+	cout<<"Borne sup heur : "<<g3.getNbCapteurs()<<endl;
+	cout<<"Temps : "<<(float)(t2-t1)/CLOCKS_PER_SEC<<endl;
 	cout<<endl;
 	out5<<g3.toString();
+	
 
-/*	fstream out3;
+	fstream out3;
     out3.open("out3.txt",fstream::trunc|fstream::out);
-	g2.randomDelete(g2.getNbCapteurs()*facteurEnleve);
-	cout<<"Borne sup amelioree 1:"<<g2.getNbCapteurs()<<endl;
-	out3<<g2.toString();
+	t1=clock();
+	g3.voisinageLigneEtColonne();
+	t2=clock();
+	cout<<"Borne sup amelioree:"<<g3.getNbCapteurs()<<endl;
+	cout<<"Temps 2: "<<(float)(t2-t1)/CLOCKS_PER_SEC<<endl;
+	out3<<g3.toString();
 
 
-	fstream out6;
-    out6.open("out6.txt",fstream::trunc|fstream::out);
-	g3.randomDelete(g3.getNbCapteurs()*facteurEnleve);
-	cout<<"Borne sup amelioree 3:"<<g3.getNbCapteurs()<<endl;
-	out6<<g3.toString();
 
-*/
 
 	/*list<pair<int,int>> r;
 	list<int> t;

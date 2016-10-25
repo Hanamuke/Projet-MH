@@ -60,8 +60,13 @@ public:
 	void augmenteDistance(bitset<2500>& bi);
 	void ajouteCapteursPourRelier(int l1, int c1, int l2, int c2);
 	bool verify();
+	void ajouteCapteursPourCouvrir(int index);
 	void combineHeur();
 	void neighImprove();
+	//Recherche une meilleure solution dans un voisinage ou on a flip une  ligne ou une colonne
+	void voisinageLigneEtColonne();
+	void flipColonneOuLigne(bool colonne, int n);
+
 
 	Grille& operator=(Grille &arg) // copy/move constructor is called to construct arg
 	{
@@ -76,4 +81,6 @@ public:
 
 	string toString() const;
 	static void reset();
+
+
 };
