@@ -161,7 +161,7 @@ string Grille::toString() const
 		}
 		ret+='\n';
 	}
-	/*ret+="Zone couverte\n";
+	ret+="Zone couverte\n";
 	for(int i=0; i<taille; i++){
 		for(int j=0; j<taille; j++){
 			ret+=couvert[i*taille+j]?"1 ":"0 ";
@@ -181,7 +181,7 @@ string Grille::toString() const
 			ret+=capteurs[i*taille+j] && !connecte[i*taille+j]?"1 ":"0 ";
 		}
 		ret+='\n';
-	}*/
+	}
 	ret+=estRealisable()?"La solution est réalisable.\n":"La solution n'est pas réalisable.\n";
 	ret+=to_string(nbCapteurs);
 	ret+=" capteurs sont utilisés.";
@@ -289,7 +289,7 @@ void Grille::ajouteCapteursPourRelier(int l1, int c1, int l2, int c2){
 					newL++;
 					aDroite=!aDroite;
 				}
-				else if(c2>newC){
+				else if(!aDroite && c2>newC){
 					newC++;
 					aDroite=!aDroite;
 				}
@@ -355,58 +355,58 @@ void Grille::ajouteCapteursPourRelier(int l1, int c1, int l2, int c2){
 
 void Grille::transRealisable(){
 	for(int i=1; i<taille*taille; i++){
-			if(!couvert[i]){
-				if(rCapt==1 && rCom==1 && taille==10)
-					addCaptor(i);
-				else
-					ajouteCapteursPourCouvrir(i);
-			}
+		if(!couvert[i]){
+			if(rCapt==1 && rCom==1 && taille==10)
+			addCaptor(i);
+			else
+			ajouteCapteursPourCouvrir(i);
+		}
 	}
 
 
 	for(int i=0; i<taille*taille; i++){
-			if(((~connecte)&capteurs)[i]){
+		if(((~connecte)&capteurs)[i]){
 
-				// bi est le bitset des capteurs qui sont dans la meme composante connexe
-				bitset<2500> bi;
-				bi.reset();
-				bitset<2500> ciblesReliees;
-				ciblesReliees.reset();
-				compConnexe(ciblesReliees, bi, i);
+			// bi est le bitset des capteurs qui sont dans la meme composante connexe
+			bitset<2500> bi;
+			bi.reset();
+			bitset<2500> ciblesReliees;
+			ciblesReliees.reset();
+			compConnexe(ciblesReliees, bi, i);
 
-				//bi devient le bitset des capteurs qui ne sont pas dans la composante connexe
-				bi=capteurs&(~bi);
-				int dist=rCom;
-				while((bi&ciblesReliees).none()){
-					dist++;
-					augmenteDistance(ciblesReliees);
+			//bi devient le bitset des capteurs qui ne sont pas dans la composante connexe
+			bi=capteurs&(~bi);
+			int dist=rCom;
+			while((bi&ciblesReliees).none()){
+				dist++;
+				augmenteDistance(ciblesReliees);
+			}
+
+			int indexAutreComp=0;
+			while(!(bi&ciblesReliees).test(indexAutreComp))
+			indexAutreComp++;
+			int lAutreComp=indexAutreComp/taille;
+			int cAutreComp=indexAutreComp%taille;
+			int lCetteComp=max(0,lAutreComp-dist);
+			int cCetteComp=max(0,cAutreComp-dist);
+			bi=capteurs&(~bi);
+
+
+
+			while(lCetteComp<=min(taille-1,lAutreComp+dist) && !(bi.test(lCetteComp*taille+cCetteComp))){
+				while(cCetteComp<=min(taille-1,cAutreComp+dist) && !(bi.test(lCetteComp*taille+cCetteComp)))
+				cCetteComp++;
+
+				if( !(bi.test(lCetteComp*taille+cCetteComp)) ){
+					cCetteComp=max(0,cAutreComp-dist);
+					lCetteComp++;
 				}
-
-				int indexAutreComp=0;
-				while(!(bi&ciblesReliees).test(indexAutreComp))
-					indexAutreComp++;
-				int lAutreComp=indexAutreComp/taille;
-				int cAutreComp=indexAutreComp%taille;
-				int lCetteComp=max(0,lAutreComp-dist);
-				int cCetteComp=max(0,cAutreComp-dist);
-				bi=capteurs&(~bi);
+			}
 
 
-
-				while(lCetteComp<=min(taille-1,lAutreComp+dist) && !(bi.test(lCetteComp*taille+cCetteComp))){
-					while(cCetteComp<=min(taille-1,cAutreComp+dist) && !(bi.test(lCetteComp*taille+cCetteComp)))
-						cCetteComp++;
-
-					if( !(bi.test(lCetteComp*taille+cCetteComp)) ){
-						cCetteComp=max(0,cAutreComp-dist);
-						lCetteComp++;
-					}
-				}
-
-
-				ajouteCapteursPourRelier(lCetteComp, cCetteComp, lAutreComp, cAutreComp);
-				if(connecte.test(lAutreComp*taille+cAutreComp))
-					connect(lCetteComp*taille+cCetteComp);
+			ajouteCapteursPourRelier(lCetteComp, cCetteComp, lAutreComp, cAutreComp);
+			if(connecte.test(lAutreComp*taille+cAutreComp))
+			connect(lCetteComp*taille+cCetteComp);
 
 
 
@@ -422,7 +422,7 @@ void Grille::combineHeur(){
 		if(capteurs.test(i)){
 			eraseCaptor(i);
 			if(!estRealisable())
-				addCaptor(i);
+			addCaptor(i);
 		}
 	}
 
@@ -506,20 +506,19 @@ void Grille::flipColonneOuLigne(bool colonne, int n){
 	if(colonne){
 		for(int i=0; i<taille; i++){
 			if(capteurs.test(i*taille+n))
-				eraseCaptor(i*taille+n);
+			eraseCaptor(i*taille+n);
 			else
-				addCaptor(i*taille+n);
+			addCaptor(i*taille+n);
 		}
 	}
 	else{
 		for(int i=0; i<taille; i++){
 			if(capteurs.test(n*taille+i))
-				eraseCaptor(n*taille+i);
+			eraseCaptor(n*taille+i);
 			else
-				addCaptor(n*taille+i);
+			addCaptor(n*taille+i);
 		}
 	}
-	combineHeur();
 }
 
 void Grille::voisinageLigneEtColonne(){
@@ -528,14 +527,16 @@ void Grille::voisinageLigneEtColonne(){
 	Grille g3=Grille(taille, rCapt, rCom);
 	g3=*this;
 	for(int i=0; i<taille; i++){
-			g2.flipColonneOuLigne(true, i);
-			if(g2.getNbCapteurs()<g3.getNbCapteurs())
-				g3=g2;
-			g2=*this;
-			g2.flipColonneOuLigne(false, i);
-			if(g2.getNbCapteurs()<g3.getNbCapteurs())
-				g3=g2;
-			g2=*this;
+		g2.flipColonneOuLigne(true, i);
+		g2.combineHeur();
+		if(g2.getNbCapteurs()<g3.getNbCapteurs())
+		g3=g2;
+		g2=*this;
+		g2.flipColonneOuLigne(false, i);
+		g2.combineHeur();
+		if(g2.getNbCapteurs()<g3.getNbCapteurs())
+		g3=g2;
+		g2=*this;
 	}
 
 	*this=g3;
@@ -551,18 +552,18 @@ void Grille::pivotDestructeur(vector<int> const & capt, vector<int> const & empt
 	int cntcapt=0, cntempty=1;
 	for(int i=0; empty[i]!=0; i++)
 	{
-			eraseCaptor(empty[i]);
-			if(!estRealisable())
-			{
-				new_capt[cntcapt]=empty[i];
-				cntcapt++;
-				addCaptor(empty[i]);
-			}
-			else
-			{
-				new_empty[cntempty]=empty[i];
-				cntempty++;
-			}
+		eraseCaptor(empty[i]);
+		if(!estRealisable())
+		{
+			new_capt[cntcapt]=empty[i];
+			cntcapt++;
+			addCaptor(empty[i]);
+		}
+		else
+		{
+			new_empty[cntempty]=empty[i];
+			cntempty++;
+		}
 	}
 	for(int i=0; capt[i]!=0; i++)
 	{
@@ -651,4 +652,171 @@ void Grille::recuitSimule()
 		cout<<"current score"<<last_score<<endl;
 	}
 	*this=gbest;
+}
+
+void Grille::voisinageDeuxLigneEtColonne(){
+	Grille g2=Grille(taille, rCapt, rCom);
+	g2=*this;
+	Grille g3=Grille(taille, rCapt, rCom);
+	g3=*this;
+	for(int i=0;i<taille; i++){
+		for(int j=i+1; j<taille; j++){
+			g2.flipColonneOuLigne(true, i);
+			g2.flipColonneOuLigne(true, j);
+			g2.combineHeur();
+
+			if(g2.getNbCapteurs()<g3.getNbCapteurs())
+			g3=g2;
+			g2=*this;
+		}
+
+		for(int j=0; j<taille; j++){
+
+			g2.flipColonneOuLigne(true, i);
+			g2.flipColonneOuLigne(false, j);
+			g2.combineHeur();
+			if(g2.getNbCapteurs()<g3.getNbCapteurs())
+			g3=g2;
+			g2=*this;
+		}
+	}
+	for(int i=0; i<taille; i++){
+		for(int j=i+1; j<taille; j++){
+
+			g2.flipColonneOuLigne(false, i);
+			g2.flipColonneOuLigne(false, j);
+			g2.combineHeur();
+			if(g2.getNbCapteurs()<g3.getNbCapteurs())
+			g3=g2;
+			g2=*this;
+		}
+	}
+	*this=g3;
+
+
+}
+
+void Grille::voisDeuxLigneEtColonnePourVND(){
+	Grille g2=Grille(taille, rCapt, rCom);
+	g2=*this;
+
+	for(int i=0;i<taille; i++){
+		for(int j=i+1; j<taille; j++){
+			g2.flipColonneOuLigne(true, i);
+			g2.flipColonneOuLigne(true, j);
+			g2.combineHeur();
+
+			if(g2.getNbCapteurs()<nbCapteurs){
+				*this=g2;
+				return;
+			}
+			g2=*this;
+		}
+
+		for(int j=0; j<taille; j++){
+
+			g2.flipColonneOuLigne(true, i);
+			g2.flipColonneOuLigne(false, j);
+			g2.combineHeur();
+			if(g2.getNbCapteurs()<nbCapteurs){
+				*this=g2;
+				return ;
+			}
+			g2=*this;
+		}
+	}
+	for(int i=0; i<taille; i++){
+		for(int j=i+1; j<taille; j++){
+
+			g2.flipColonneOuLigne(false, i);
+			g2.flipColonneOuLigne(false, j);
+			g2.combineHeur();
+			if(g2.getNbCapteurs()<nbCapteurs){
+				*this=g2;
+				return;
+			}
+			g2=*this;
+		}
+	}
+
+
+}
+
+//Beaucoup trop onéreux en pratique...
+void Grille::voisinageTroisLigneEtColonne(){
+	Grille g2=Grille(taille, rCapt, rCom);
+	g2=*this;
+	Grille g3=Grille(taille, rCapt, rCom);
+	g3=*this;
+	for(int i=0;i<taille; i++){
+		for(int j=i+1; j<taille; j++){
+			for(int k=j+1; k<taille; k++){
+				g2.flipColonneOuLigne(true, i);
+				g2.flipColonneOuLigne(true, j);
+				g3.flipColonneOuLigne(true, k);
+				g2.combineHeur();
+				if(g2.getNbCapteurs()<g3.getNbCapteurs())
+				g3=g2;
+				g2=*this;
+			}
+			for(int k=0; k<taille; k++){
+				g2.flipColonneOuLigne(true, i);
+				g2.flipColonneOuLigne(true, j);
+				g3.flipColonneOuLigne(false, k);
+				g2.combineHeur();
+				if(g2.getNbCapteurs()<g3.getNbCapteurs())
+				g3=g2;
+				g2=*this;
+			}
+		}
+		for(int j=0; j<taille; j++){
+			for(int k=j+1; k<taille; k++){
+				g2.flipColonneOuLigne(true, i);
+				g2.flipColonneOuLigne(false, j);
+				g3.flipColonneOuLigne(false, k);
+				g2.combineHeur();
+				if(g2.getNbCapteurs()<g3.getNbCapteurs())
+				g3=g2;
+				g2=*this;
+			}
+		}
+	}
+	for(int i=0;i<taille; i++){
+		for(int j=i+1; j<taille; j++){
+			for(int k=j+1; k<taille; k++){
+				g2.flipColonneOuLigne(false, i);
+				g2.flipColonneOuLigne(false, j);
+				g3.flipColonneOuLigne(false, k);
+				g2.combineHeur();
+				if(g2.getNbCapteurs()<g3.getNbCapteurs())
+				g3=g2;
+				g2=*this;
+			}
+		}
+	}
+
+	*this=g3;
+
+}
+
+void Grille::VND(){
+
+	int k=0;
+	while(k<2){
+
+		cout<<"k : "<<k<<endl;
+		Grille g(taille, rCapt, rCom);
+		g=*this;
+		if(k==0)
+		g.voisinageLigneEtColonne();
+		else
+		g.voisDeuxLigneEtColonnePourVND();
+
+		if(g.getNbCapteurs()<nbCapteurs){
+			*this=g;
+			k=0;
+		}
+		else
+		k++;
+	}
 }

@@ -65,6 +65,11 @@ public:
 	void neighImprove();
 	//Recherche une meilleure solution dans un voisinage ou on a flip une  ligne ou une colonne
 	void voisinageLigneEtColonne();
+	void voisinageDeuxLigneEtColonne();
+	void voisinageTroisLigneEtColonne();
+	//Recherche une meilleure solution dans un voisinage 2 flip et s'arrete à la premiere amélioration
+	void voisDeuxLigneEtColonnePourVND();
+	void VND();
 	void flipColonneOuLigne(bool colonne, int n);
 	void pivotDestructeur(vector<int> const & capt, vector<int> const & empty, vector<int> & new_capt, vector<int> & new_empty, int pivot);
 
