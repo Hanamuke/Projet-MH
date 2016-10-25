@@ -3,6 +3,7 @@
 #include <bitset>
 #include <array>
 #include <list>
+#include <iostream>
 
 using namespace std;
 
@@ -10,7 +11,8 @@ class Grille{
 private:
 	int nbCapteurs;
 	const int taille, rCapt, rCom;
-	static array<bitset<2500>,2500> couvertMatrix;;
+	static array<bitset<2500>,2500> couvertMatrix;
+	static array<bitset<2500>,2500> connecteMatrix;
 	static array<list<uint16_t>,2500> coverNeighGraph;
 	static array<list<uint16_t>,2500> connectNeighGraph;
 	static bitset<2500> maskMatrix;
@@ -45,6 +47,8 @@ public:
 	void eraseCaptor(int index);
 	//effectue un parcours en profondeur à partir du sommet donnée pour connecter le graphe
 	void connect(int index);
+	//vérifie si un capteur est nécessaire à la couverture.
+	bool checkCoverCaptor(int index) const;
 	//Retourne les coordonnées du plus proche capteur connecté au puit
 	pair<int,int> plusProcheConnecte(int i, int j);
 	//Supprime des points aléatoirement pour en replacer d'autres
@@ -55,7 +59,7 @@ public:
 	void compConnexe(bitset<2500>& ciblesReliees, bitset<2500>& capteursReliees, int index);
 	void augmenteDistance(bitset<2500>& bi);
 	void ajouteCapteursPourRelier(int l1, int c1, int l2, int c2);
-
+	bool verify();
 	void combineHeur();
 	void neighImprove();
 

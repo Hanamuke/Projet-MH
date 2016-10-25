@@ -9,6 +9,7 @@
 
 bool Grille::matrixInitialized=false;
 array<bitset<2500>,2500> Grille::couvertMatrix;
+array<bitset<2500>,2500> Grille::connecteMatrix;
 array<list<uint16_t>,2500> Grille::coverNeighGraph;
 array<list<uint16_t>,2500> Grille::connectNeighGraph;
 bitset<2500> Grille::maskMatrix;
@@ -29,6 +30,7 @@ Grille::Grille(int t, int _rCapt, int _rCom):taille(t),rCapt(_rCapt),rCom(_rCom)
 				}
 				if((k-i)*(k-i)+(l-j)*(l-j)<=rCom*rCom && (i!=k || j!=l)){
 					connectNeighGraph[i*t+j].push_back(t*k+l);
+					connecteMatrix[i*t+j].set();
 				}
 
 			}
@@ -146,7 +148,7 @@ void Grille::fill()
 	couvert.set(0);
 	connecte.set(0);
 	coverGraph=coverNeighGraph;
-	connectGraph=coverNeighGraph;
+	connectGraph=connectNeighGraph;
 }
 
 string Grille::toString() const
@@ -158,7 +160,7 @@ string Grille::toString() const
 		}
 		ret+='\n';
 	}
-	ret+="Zone couverte\n";
+	/*ret+="Zone couverte\n";
 	for(int i=0; i<taille; i++){
 		for(int j=0; j<taille; j++){
 			ret+=couvert[i*taille+j]?"1 ":"0 ";
@@ -178,11 +180,25 @@ string Grille::toString() const
 			ret+=capteurs[i*taille+j] && !connecte[i*taille+j]?"1 ":"0 ";
 		}
 		ret+='\n';
-	}
+	}*/
 	ret+=estRealisable()?"La solution est réalisable.\n":"La solution n'est pas réalisable.\n";
 	ret+=to_string(nbCapteurs);
 	ret+=" capteurs sont utilisés.";
 	return ret;
+}
+
+bool Grille::checkCoverCaptor(int index) const
+{
+	bool covered=false;
+	for(auto i=coverGraph[index].begin(); i!=coverGraph[index].end(); i++)
+	{
+		if(coverGraph[*i].size()==1 && !capteurs.test(*i) && *i!=0)
+		return true;
+		if(capteurs.test(*i))
+		covered=true;
+	}
+
+	return !covered;
 }
 
 void Grille::rendRealisable(){
@@ -198,6 +214,20 @@ void Grille::rendRealisable(){
 	}
 }
 
+bool Grille::verify()
+{
+	couvert.reset();
+	for(int i=0; i<taille*taille; i++)
+	if(capteurs.test(i))
+	couvert|=couvertMatrix[i];
+	if(!((couvert|~maskMatrix).all()))
+	return false;
+	connecte.reset();
+	connect(0);
+	if(((~connecte)&capteurs).any())
+	return false;
+	return true;
+}
 
 void Grille::randomDelete(int n){
 
@@ -431,12 +461,12 @@ void Grille::neighImprove()
 		g.fill();
 		for(auto i= permutation.begin(); i!=permutation.end(); i++)
 		{
-			g.eraseCaptor(*i);
-			if(!g.estRealisable())
-			{
-				temp.push_back(i);
-				g.addCaptor(*i);
-			}
+				g.eraseCaptor(*i);
+				if(!g.estRealisable())
+				{
+					temp.push_back(i);
+					g.addCaptor(*i);
+				}
 		}
 		if(g.getNbCapteurs()<best_score)
 		{
@@ -446,8 +476,8 @@ void Grille::neighImprove()
 			k=capt.begin();
 			cout<<"New best:"<<best_score<<endl;
 			cnt=0;
-			cout<<toString()<<endl;
-			cin.get();
+			//cout<<toString()<<endl;
+			//cin.get();
 		}
 		else
 		{
