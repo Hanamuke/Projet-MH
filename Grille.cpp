@@ -323,6 +323,7 @@ void Grille::ajouteCapteursPourRelier(int l1, int c1, int l2, int c2){
 }
 
 
+
 void Grille::transRealisable(){
 	for(int i=1; i<taille*taille; i++){
 			if(!couvert[i]){
@@ -332,6 +333,57 @@ void Grille::transRealisable(){
 					ajouteCapteursPourCouvrir(i);
 			}
 	}
+
+
+	for(int i=0; i<taille*taille; i++){
+			if(((~connecte)&capteurs)[i]){
+					
+				// bi est le bitset des capteurs qui sont dans la meme composante connexe
+				bitset<2500> bi;
+				bi.reset();
+				bitset<2500> ciblesReliees;
+				ciblesReliees.reset();
+				compConnexe(ciblesReliees, bi, i);					
+				
+				//bi devient le bitset des capteurs qui ne sont pas dans la composante connexe
+				bi=capteurs&(~bi);
+				int dist=rCom;
+				while((bi&ciblesReliees).none()){
+					dist++;
+					augmenteDistance(ciblesReliees);
+				}
+					
+				int indexAutreComp=0;
+				while(!(bi&ciblesReliees).test(indexAutreComp))
+					indexAutreComp++;
+				int lAutreComp=indexAutreComp/taille;
+				int cAutreComp=indexAutreComp%taille;
+				int lCetteComp=max(0,lAutreComp-dist);
+				int cCetteComp=max(0,cAutreComp-dist);
+				bi=capteurs&(~bi);
+
+				
+
+				while(lCetteComp<=min(taille-1,lAutreComp+dist) && !(bi.test(lCetteComp*taille+cCetteComp))){	
+					while(cCetteComp<=min(taille-1,cAutreComp+dist) && !(bi.test(lCetteComp*taille+cCetteComp)))
+						cCetteComp++;
+		
+					if( !(bi.test(lCetteComp*taille+cCetteComp)) ){
+						cCetteComp=max(0,cAutreComp-dist);
+						lCetteComp++;
+					}	
+				}
+
+		
+				ajouteCapteursPourRelier(lCetteComp, cCetteComp, lAutreComp, cAutreComp);
+				if(connecte.test(lAutreComp*taille+cAutreComp))
+					connect(lCetteComp*taille+cCetteComp);
+					
+					
+					
+		}
+	}
+
 }
 
 void Grille::combineHeur(){
