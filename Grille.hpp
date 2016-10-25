@@ -11,6 +11,7 @@ private:
 	int nbCapteurs;
 	const int taille, rCapt, rCom;
 	static array<bitset<2500>,2500> couvertMatrix;;
+	static array<bitset<2500>,2500> connecteMatrix;
 	static array<list<uint16_t>,2500> coverNeighGraph;
 	static array<list<uint16_t>,2500> connectNeighGraph;
 	static bitset<2500> maskMatrix;
@@ -55,9 +56,13 @@ public:
 	void compConnexe(bitset<2500>& ciblesReliees, bitset<2500>& capteursReliees, int index);
 	void augmenteDistance(bitset<2500>& bi);
 	void ajouteCapteursPourRelier(int l1, int c1, int l2, int c2);
-
+	void ajouteCapteursPourCouvrir(int index);
 	void combineHeur();
 	void neighImprove();
+	//Recherche une meilleure solution dans un voisinage ou on a flip une  ligne ou une colonne
+	void voisinageLigneEtColonne();
+	void flipColonneOuLigne(bool colonne, int n);
+
 
 	Grille& operator=(Grille &arg) // copy/move constructor is called to construct arg
 	{
@@ -72,4 +77,6 @@ public:
 
 	string toString() const;
 	static void reset();
+	
+
 };

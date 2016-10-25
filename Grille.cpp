@@ -9,6 +9,7 @@
 
 bool Grille::matrixInitialized=false;
 array<bitset<2500>,2500> Grille::couvertMatrix;
+array<bitset<2500>,2500> Grille::connecteMatrix;
 array<list<uint16_t>,2500> Grille::coverNeighGraph;
 array<list<uint16_t>,2500> Grille::connectNeighGraph;
 bitset<2500> Grille::maskMatrix;
@@ -28,6 +29,7 @@ Grille::Grille(int t, int _rCapt, int _rCom):taille(t),rCapt(_rCapt),rCom(_rCom)
 					coverNeighGraph[i*t+j].push_back(t*k+l);
 				}
 				if((k-i)*(k-i)+(l-j)*(l-j)<=rCom*rCom && (i!=k || j!=l)){
+					connecteMatrix[t*i+j].set(t*k+l);
 					connectNeighGraph[i*t+j].push_back(t*k+l);
 				}
 
@@ -146,7 +148,7 @@ void Grille::fill()
 	couvert.set(0);
 	connecte.set(0);
 	coverGraph=coverNeighGraph;
-	connectGraph=coverNeighGraph;
+	connectGraph=connectNeighGraph;
 }
 
 string Grille::toString() const
@@ -323,60 +325,13 @@ void Grille::ajouteCapteursPourRelier(int l1, int c1, int l2, int c2){
 
 void Grille::transRealisable(){
 	for(int i=1; i<taille*taille; i++){
-		if(!couvert[i])
-		addCaptor(i);
-	}
-
-
-	for(int i=0; i<taille*taille; i++){
-		if(((~connecte)&capteurs)[i]){
-
-			// bi est le bitset des capteurs qui sont dans la meme composante connexe
-			bitset<2500> bi;
-			bi.reset();
-			bitset<2500> ciblesReliees;
-			ciblesReliees.reset();
-			compConnexe(ciblesReliees, bi, i);
-
-			//bi devient le bitset des capteurs qui ne sont pas dans la composante connexe
-			bi=capteurs&(~bi);
-			int dist=rCom;
-			while((bi&ciblesReliees).none()){
-				dist++;
-				augmenteDistance(ciblesReliees);
+			if(!couvert[i]){
+				if(rCapt==1 && rCom==1 && taille==10)
+					addCaptor(i);
+				else	
+					ajouteCapteursPourCouvrir(i);
 			}
-
-			int indexAutreComp=0;
-			while(!(bi&ciblesReliees).test(indexAutreComp))
-			indexAutreComp++;
-			int lAutreComp=indexAutreComp/taille;
-			int cAutreComp=indexAutreComp%taille;
-			int lCetteComp=max(0,lAutreComp-dist);
-			int cCetteComp=max(0,cAutreComp-dist);
-			bi=capteurs&(~bi);
-
-
-
-			while(lCetteComp<=min(taille-1,lAutreComp+dist) && !(bi.test(lCetteComp*taille+cCetteComp))){
-				while(cCetteComp<=min(taille-1,cAutreComp+dist) && !(bi.test(lCetteComp*taille+cCetteComp)))
-				cCetteComp++;
-
-				if( !(bi.test(lCetteComp*taille+cCetteComp)) ){
-					cCetteComp=max(0,cAutreComp-dist);
-					lCetteComp++;
-				}
-			}
-
-
-			ajouteCapteursPourRelier(lCetteComp, cCetteComp, lAutreComp, cAutreComp);
-			if(connecte.test(lAutreComp*taille+cAutreComp))
-			connect(lCetteComp*taille+cCetteComp);
-
-
-
-		}
 	}
-
 }
 
 void Grille::combineHeur(){
@@ -386,7 +341,7 @@ void Grille::combineHeur(){
 		if(capteurs.test(i)){
 			eraseCaptor(i);
 			if(!estRealisable())
-			addCaptor(i);
+				addCaptor(i);
 		}
 	}
 
@@ -466,4 +421,62 @@ void Grille::neighImprove()
 		}
 		temp.clear();
 	}
+}
+
+
+void Grille::ajouteCapteursPourCouvrir(int index){
+	float distMax=0;
+	int aPlacer=index;
+	int l=index/taille;
+	int c=index%taille;
+	for(int i=max(0,l-rCapt); i<=min(taille-1,l+rCapt); i++){
+		for(int j=max(0,c-rCapt); j<=min(taille-1,c+rCapt); j++){
+			float dist=(l-i)*(l-i)+(c-j)*(c-j);
+			if(!capteurs.test(i*taille+j) && dist<=rCom && dist>distMax){
+				distMax=dist;
+				aPlacer=i*taille+j;
+			}
+		}
+	}
+
+	addCaptor(aPlacer);
+}
+
+void Grille::flipColonneOuLigne(bool colonne, int n){
+	if(colonne){
+		for(int i=0; i<taille; i++){
+			if(capteurs.test(i*taille+n))
+				eraseCaptor(i*taille+n);
+			else
+				addCaptor(i*taille+n);
+		}
+	}
+	else{
+		for(int i=0; i<taille; i++){
+			if(capteurs.test(n*taille+i))
+				eraseCaptor(n*taille+i);
+			else
+				addCaptor(n*taille+i);
+		}
+	}
+	combineHeur();
+}
+
+void Grille::voisinageLigneEtColonne(){
+	Grille g2=Grille(taille, rCapt, rCom);
+	g2=*this;
+	Grille g3=Grille(taille, rCapt, rCom);
+	g3=*this;
+	for(int i=0; i<taille; i++){
+			g2.flipColonneOuLigne(true, i);
+			if(g2.getNbCapteurs()<g3.getNbCapteurs())
+				g3=g2;
+			g2=*this;
+			g2.flipColonneOuLigne(false, i);
+			if(g2.getNbCapteurs()<g3.getNbCapteurs())
+				g3=g2;
+			g2=*this;
+	}
+	
+	*this=g3;
 }
