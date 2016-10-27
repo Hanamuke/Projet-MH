@@ -194,7 +194,7 @@ string Grille::toString() const
 		ret+='\n';
 	}
 	ret+=estRealisable()?"La solution est réalisable.\n":"La solution n'est pas réalisable.\n";
-	ret+=to_string(nbCapteurs);
+	//ret+=to_string(nbCapteurs);
 	ret+=" capteurs sont utilisés.";
 	return ret;
 }
@@ -388,6 +388,7 @@ void Grille::transRealisable(){
 
 			//bi devient le bitset des capteurs qui ne sont pas dans la composante connexe
 			bi=capteurs&(~bi);
+			bi.set(0);
 			int dist=rCom;
 			while((bi&ciblesReliees).none()){
 				dist++;
@@ -833,5 +834,104 @@ void Grille::VND(){
 		}
 		else
 		k++;
+	}
+}
+
+void Grille::fromBitset(bitset<2500>& capt){
+	nbCapteurs=0;
+	for(int i=0; i<taille*taille; i++){
+		if(capt.test(i))
+			addCaptor(i);
+	}
+}
+
+
+void Grille::videGrille(){
+	nbCapteurs=0;
+	couvert.reset();
+	couvert.set(0);
+	capteurs.reset();
+	connecte.reset();
+	connecte.set(0);
+	for(int i=0; i<2500; i++)
+	{
+		coverGraph[i].clear();
+		connectGraph[i].clear();
+	}
+}
+
+
+void Grille::voisinageLigneEtColonneLimitee(clock_t tempsInitial, float temps){
+	Grille g2=Grille(taille, rCapt, rCom);
+	g2=*this;
+	Grille g3=Grille(taille, rCapt, rCom);
+	g3=*this;
+	bitset<2500> testee;
+	testee.reset();
+	for(int i=0; i<taille; i++){
+			float diff=(float)(clock()-tempsInitial)/CLOCKS_PER_SEC;
+			int choix=rand()%taille;
+			while(testee.test(choix))
+				choix=rand()%taille;
+
+			testee.set(choix);
+			if(diff>temps)
+				break;
+			
+		
+			g2.flipColonneOuLigne(true, choix);
+			g2.combineHeur();
+			if(g2.getNbCapteurs()<g3.getNbCapteurs())
+				g3=g2;
+			g2=*this;
+			g2.flipColonneOuLigne(false, choix);
+			g2.combineHeur();
+			if(g2.getNbCapteurs()<g3.getNbCapteurs())
+				g3=g2;
+			g2=*this;
+	}
+	
+	*this=g3;
+}
+
+
+void Grille::descenteLocale(){
+	int fini=false;
+	int ancienNbCapt=nbCapteurs;
+	while(!fini){
+		fini=true;
+		voisinageLigneEtColonne();
+		if(nbCapteurs<ancienNbCapt){
+			ancienNbCapt=nbCapteurs;
+			fini=false;
+		}
+	}
+}
+
+void Grille::descenteLocaleLimitee(float temps){
+	int fini=false;
+	int ancienNbCapt=nbCapteurs;
+	clock_t t1=clock();
+	float diff=(float)(clock()-t1)/CLOCKS_PER_SEC;
+	while(!fini && diff<temps){
+		fini=true;
+		voisinageLigneEtColonneLimitee(t1, temps);
+		if(nbCapteurs<ancienNbCapt){
+			ancienNbCapt=nbCapteurs;
+			fini=false;
+		}
+		diff=(float)(clock()-t1)/CLOCKS_PER_SEC;
+	}
+}
+
+
+void Grille::poseCapteursAleatoires(int n){
+	int compt=0;
+	while(compt<n){
+		int i=rand()%(taille*taille-1)+1;
+		if(!capteurs.test(i)){
+			addCaptor(i);
+			compt++;
+		}
 	}
 }

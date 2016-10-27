@@ -5,6 +5,7 @@
 #include <list>
 #include <iostream>
 #include "greedyList.hpp"
+#include <ctime>
 
 using namespace std;
 
@@ -30,6 +31,7 @@ private:
 
 public:
 	Grille(int t, int _rCapt, int _rCom);
+	void fromBitset(bitset<2500>& capt);
 	//remplie la grille de capteurs.
 	void fill();
 	int getNbCapteurs(){return nbCapteurs;}
@@ -43,6 +45,7 @@ public:
 	//ajoute un capteur aux coordonnées souhaitées et conserve l'integrité des différents variables.
 	void addCaptor(int i, int j);
 	void addCaptor(int index);
+	bitset<2500> getCapteurs(){return capteurs;}
 	//supprime un capteur aux coordonnées souhaitées et conserve l'integrité des différents variables.
 	void eraseCaptor(int i, int j);
 	void eraseCaptor(int index);
@@ -54,6 +57,7 @@ public:
 	pair<int,int> plusProcheConnecte(int i, int j);
 	//Supprime des points aléatoirement pour en replacer d'autres
 	void randomDelete(int n);
+	void videGrille();
 	//Renvoie une grille realisable à partir de la grille en cours
 	void transRealisable();
 	//donne le vecteur des sommets dans la meme composante connexe pour la connectivité
@@ -70,9 +74,14 @@ public:
 	void voisinageTroisLigneEtColonne();
 	//Recherche une meilleure solution dans un voisinage 2 flip et s'arrete à la premiere amélioration
 	void voisDeuxLigneEtColonnePourVND();
+	void voisinageLigneEtColonneLimitee(clock_t tempsInitial, float temps);
 	void VND();
 	void flipColonneOuLigne(bool colonne, int n);
 	void pivotDestructeur(vector<int> const & capt, vector<int> const & empty, vector<int> & new_capt, vector<int> & new_empty, int pivot);
+	void descenteLocale();	
+	// Descente Locale qui s'arrête au bout d'un certain temps si c'est trop long
+	void descenteLocaleLimitee(float temps);
+	void poseCapteursAleatoires(int n);
 
 	Grille& operator=(Grille &arg) // copy/move constructor is called to construct arg
 	{
