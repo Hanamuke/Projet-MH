@@ -10,13 +10,18 @@
 bool Grille::matrixInitialized=false;
 array<bitset<2500>,2500> Grille::couvertMatrix;
 array<bitset<2500>,2500> Grille::connecteMatrix;
-array<list<uint16_t>,2500> Grille::coverNeighGraph;
-array<list<uint16_t>,2500> Grille::connectNeighGraph;
+array<GreedyList<uint16_t>,2500> Grille::coverNeighGraph;
+array<GreedyList<uint16_t>,2500> Grille::connectNeighGraph;
 bitset<2500> Grille::maskMatrix;
 
 Grille::Grille(int t, int _rCapt, int _rCom):taille(t),rCapt(_rCapt),rCom(_rCom){
 	nbCapteurs=0;
 	if(!matrixInitialized){
+		for(int i=0; i<2500; i++)
+		{
+			coverNeighGraph[i].resize(2500);
+			connectNeighGraph[i].resize(2500);
+		}
 		for(int i=0; i<t; i++)
 		for(int j=0; j<t; j++){
 			if(i+j!=0)
@@ -37,6 +42,11 @@ Grille::Grille(int t, int _rCapt, int _rCom):taille(t),rCapt(_rCapt),rCom(_rCom)
 			}
 		}
 		matrixInitialized=true;
+	}
+	for(int i=0; i<2500; i++)
+	{
+		coverGraph[i].resize(coverNeighGraph[i].size());
+		connectGraph[i].resize(connectNeighGraph[i].size());
 	}
 	couvert.set(0);
 	connecte.set(0);
@@ -76,16 +86,16 @@ void Grille::addCaptor(int index)
 	for(auto k=coverNeighGraph[index].begin(); k!=coverNeighGraph[index].end(); k++)
 	{
 		if(!capteurs.test(*k)){
-			coverGraph[index].push_front(*k);
-			coverGraph[*k].push_front(index);
+			coverGraph[index].push_back(*k);
+			coverGraph[*k].push_back(index);
 		}
 	}
 	bool co=false;
 	for(auto k=connectNeighGraph[index].begin(); k!=connectNeighGraph[index].end(); k++)
 	{
 		if(capteurs.test(*k)||*k==0){
-			connectGraph[index].push_front(*k);
-			connectGraph[*k].push_front(index);
+			connectGraph[index].push_back(*k);
+			connectGraph[*k].push_back(index);
 			if(connecte.test(*k))
 			co=true;
 		}
@@ -150,6 +160,7 @@ void Grille::fill()
 	connecte.set(0);
 	coverGraph=coverNeighGraph;
 	connectGraph=connectNeighGraph;
+
 }
 
 string Grille::toString() const
@@ -205,7 +216,8 @@ bool Grille::checkCoverCaptor(int index) const
 void Grille::rendRealisable(){
 	vector<int> permutation(taille*taille-1);
 	for(int i=0; i<taille*taille-1; i++)
-	permutation[i]=((i+1)*7)%(taille*taille);
+	permutation[i]=i+1;
+	random_shuffle(permutation.begin(), permutation.end());
 	fill();
 	for(auto i= permutation.begin(); i!=permutation.end(); i++)
 	{
@@ -475,7 +487,7 @@ void Grille::neighImprove()
 		else
 		{
 			cnt++;
-			//cout<<"unsuccessful : "<<cnt<<"/"<<best_score<<" : "<<g.getNbCapteurs()<<endl;
+			cout<<"unsuccessful : "<<cnt<<"/"<<best_score<<" : "<<g.getNbCapteurs()<<endl;
 			if(cnt==best_score)
 			return;
 			k=capt[cnt];
@@ -587,10 +599,10 @@ void Grille::pivotDestructeur(vector<int> const & capt, vector<int> const & empt
 
 void Grille::recuitSimule()
 {
-	Grille gbest(taille, rCapt,rCom);
+	Grille gbest(*this);
 	double rho=0.85;
-	double T=0.1*nbCapteurs/50;
-	int k=nbCapteurs/0.2;
+	double T=1.2;
+	int k=nbCapteurs/0.8;
 	int best_score=nbCapteurs;
 	int last_score=best_score,cntcapt=0, cntempty=0, last_iter_score=best_score;
 	if(!estRealisable())
@@ -617,13 +629,15 @@ void Grille::recuitSimule()
 	}
 	Grille g(taille, rCapt,rCom);
 	int cnt=0;
-	while(cnt<5-taille/10)
+	while(cnt<2 || T>0.1)
 	{
-		k=nbCapteurs/0.2;
-		for(int i=0; i<k; i++)
+		clock_t t0=clock();
+		for(int i=0;clock()-t0<(CLOCKS_PER_SEC*nbCapteurs)/20 || i<k; i++)
 		{
+			k=nbCapteurs/0.8;
 			int pivot=rand()%nbCapteurs;
 			random_shuffle(empty.begin(),empty.begin()+taille*taille-1-nbCapteurs);
+			random_shuffle(capt.begin(),capt.begin()+nbCapteurs);
 			g.pivotDestructeur(capt,empty,temp_capt,temp_empty,capt[pivot]);
 			double lambda=exp((double)(last_score-g.getNbCapteurs())/T);
 			int p=100*lambda;
@@ -636,6 +650,7 @@ void Grille::recuitSimule()
 				last_score=g.getNbCapteurs();
 				if(last_score<best_score)
 				{
+					cnt=0;
 					best_score=last_score;
 					cout<<"new best"<<best_score<<endl;
 					gbest=g;

@@ -2,6 +2,7 @@
 #define GREEDYLIST_HPP_INCLUDED
 #include <iostream>
 #include <memory>
+#include <cstring>
 
 //the greedyList is a data structure that is of fixed size, chosen at creation. It is to be used exactly the same way as a list on the front-end.
 //On the back end, it never allocate or deallocate memory, it is thus effectively faster than a list.
@@ -36,10 +37,15 @@ public:
         clear();
         if(g.begin()!=NULL && g.max_size()!=0)
         {
-            maxSize=g.max_size();
+            if(g.max_size()>maxSize)
+            {
+                if(arr!=NULL)
+                delete[] arr;
+                maxSize=g.max_size();
+                arr=new T[maxSize];
+            }
             curr_size=g.size();
-            arr=new T[maxSize];
-            memcpy(arr,g.begin(),maxSize*sizeof(T));
+            memcpy(arr,g.begin(),curr_size*sizeof(T));
         }
         else
         {
@@ -58,13 +64,22 @@ public:
     void push_back(T const & _obj){arr[curr_size]=_obj; curr_size++;}
     void push_back(T && _obj){arr[curr_size]=_obj; curr_size++;}
     void pop_back(){if(curr_size) curr_size--;}
-    void erase(T* it){curr_size--; *it=arr[curr_size];}///WARNING : CHANGES THE ORDER OF THE ELEMENTS
+    T* erase(T* it){curr_size--; *it=arr[curr_size]; T* m=it--; return m;}///WARNING : CHANGES THE ORDER OF THE ELEMENTS
     void resize(size_t s)//FOR THE MOMENT IT DELETES THE CONTENT
     {
         if(arr!=NULL)
         delete[] arr;
         arr=new T[s];
         maxSize=s;
+    }
+    void remove(T && v)
+    {
+        for(auto i=arr; i!=arr+curr_size; i++)
+        if(*i==v)
+        {
+            erase(i);
+            return;
+        }
     }
     T& operator[](size_t i){return arr[i];}
     const T& operator[](size_t i) const {return arr[i];}

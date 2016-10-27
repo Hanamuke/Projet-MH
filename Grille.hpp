@@ -4,6 +4,7 @@
 #include <array>
 #include <list>
 #include <iostream>
+#include "greedyList.hpp"
 
 using namespace std;
 
@@ -13,8 +14,8 @@ private:
 	const int taille, rCapt, rCom;
 	static array<bitset<2500>,2500> couvertMatrix;
 	static array<bitset<2500>,2500> connecteMatrix;
-	static array<list<uint16_t>,2500> coverNeighGraph;
-	static array<list<uint16_t>,2500> connectNeighGraph;
+	static array<GreedyList<uint16_t>,2500> coverNeighGraph;
+	static array<GreedyList<uint16_t>,2500> connectNeighGraph;
 	static bitset<2500> maskMatrix;
 	static bool matrixInitialized;
 	//0 si la cible (i,j) n'est pas couvert par un capteur, 1 sinon
@@ -23,8 +24,8 @@ private:
 	bitset<2500> capteurs;
 	//0 si le capteur n'est pas connecte au puit ou n'existe pas, 1 sinon
 	bitset<2500> connecte;
-	array<list<uint16_t>,2500> coverGraph;
-	array<list<uint16_t>,2500> connectGraph;
+	array<GreedyList<uint16_t>,2500> coverGraph;
+	array<GreedyList<uint16_t>,2500> connectGraph;
 
 
 public:
