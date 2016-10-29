@@ -13,6 +13,7 @@ array<bitset<2500>,2500> Grille::connecteMatrix;
 array<GreedyList<uint16_t>,2500> Grille::coverNeighGraph;
 array<GreedyList<uint16_t>,2500> Grille::connectNeighGraph;
 bitset<2500> Grille::maskMatrix;
+array<int,2500> Grille::distanceMatrix;
 
 Grille::Grille(int t, int _rCapt, int _rCom):taille(t),rCapt(_rCapt),rCom(_rCom){
 	nbCapteurs=0;
@@ -26,8 +27,12 @@ Grille::Grille(int t, int _rCapt, int _rCom):taille(t),rCapt(_rCapt),rCom(_rCom)
 		for(int j=0; j<t; j++){
 			if(i+j!=0)
 			maskMatrix.set(taille*i+j);
-			for(int k=0; k<t; k++)
-			for(int l=0; l<t; l++){
+			for(int dist=0; dist<=2*(taille-1);dist++)//je fais ça pour que les arretes qui appraissent en premier soient celle qui se rapproche de l'origine.
+			for(int k=0; k<=dist; k++)
+			{
+				if(k>=taille || dist-k>=taille)
+				continue;
+				int l=dist-k;
 				if((k-i)*(k-i)+(l-j)*(l-j)<=rCapt*rCapt){
 					couvertMatrix[taille*i+j].set(t*k+l);
 					if(k!=i || l!=j)
@@ -36,11 +41,12 @@ Grille::Grille(int t, int _rCapt, int _rCom):taille(t),rCapt(_rCapt),rCom(_rCom)
 				if((k-i)*(k-i)+(l-j)*(l-j)<=rCom*rCom && (i!=k || j!=l)){
 					connecteMatrix[t*i+j].set(t*k+l);
 					connectNeighGraph[i*t+j].push_back(t*k+l);
-					connecteMatrix[i*t+j].set();
+					//connecteMatrix[i*t+j].set();
 				}
-
+				//distanceMatrix[i*t+j]=i+j;
 			}
 		}
+		initializeDistanceMatrix(0);
 		matrixInitialized=true;
 	}
 	for(int i=0; i<2500; i++)
@@ -50,6 +56,25 @@ Grille::Grille(int t, int _rCapt, int _rCom):taille(t),rCapt(_rCapt),rCom(_rCom)
 	}
 	couvert.set(0);
 	connecte.set(0);
+}
+
+void Grille::initializeDistanceMatrix(int index)
+{
+	int dist=distanceMatrix[index];
+	if(index!=0)
+	{
+		distanceMatrix[index]=2500;
+		for(auto i=connectNeighGraph[index].begin(); i!=connectNeighGraph[index].end() ;i++)
+		if(distanceMatrix[*i]<distanceMatrix[index]-1)
+		distanceMatrix[index]=distanceMatrix[*i]+1;
+	}
+	if(distanceMatrix[index]>dist || index==0)
+	for(auto i=connectNeighGraph[index].begin(); i!=connectNeighGraph[index].end() ;i++)
+	if(*i!=0)
+	{
+		initializeDistanceMatrix(*i);
+	}
+
 }
 
 void Grille::reset()
@@ -62,6 +87,7 @@ void Grille::reset()
 		couvertMatrix[i].reset();
 	}
 	maskMatrix.reset();
+	std::fill(distanceMatrix.begin(), distanceMatrix.end(), 0);
 }
 
 bool Grille::estCouvert(int i, int j) const{
@@ -104,6 +130,20 @@ void Grille::addCaptor(int index)
 	connect(index);
 }
 
+void Grille::updateDistance(int index, int deletedCaptor)
+{
+	int dist=distance[index];
+	distance[index]=2500;
+	for(auto i=connectGraph[index].begin(); i!=connectGraph[index].end() ;i++)
+	{
+		if(distance[*i]<distance[index]-1)
+		distance[index]=distance[*i]+1;
+	}
+	if(distance[index]>dist)
+	for(auto i=connectGraph[index].begin(); i!=connectGraph[index].end() ;i++)
+	if(distance[*i]>dist && *i!=deletedCaptor && *i!=0)
+	updateDistance(*i,deletedCaptor);
+}
 void Grille::eraseCaptor(int i, int j)
 {
 	eraseCaptor(taille*i+j);
@@ -142,12 +182,136 @@ void Grille::eraseCaptor(int index)
 
 }
 
+bool Grille::eraseIfPossible(int index)
+{
+	if(!capteurs.test(index))
+	exit(8);
+	if(!checkCoverCaptor(index))
+	{
+		//cout<<"fast no cut"<<endl;
+		return false;
+	}
+	if(inamovible.test(index))
+	{
+		//cout<<"fast no cut"<<endl;
+		return false;
+	}
+	if(connectGraph[index].size()==1 || checkConnectCaptor(index))
+	{
+		//cout<<"fast cut"<<endl;
+		nbCapteurs--;
+		distance[index]=2500;
+		capteurs.reset(index);
+		for(auto k=coverGraph[index].begin(); k!=coverGraph[index].end();)
+		{
+			if(capteurs.test(*k))
+			k++;
+			else
+			{
+				coverGraph[*k].remove(index);
+				k=coverGraph[index].erase(k);
+			}
+		}
+		for(auto k=connectGraph[index].begin(); k!=connectGraph[index].end();)
+		{
+			//si le capteur est un feuille, son voisin deviennent a priori amovibles.
+			if(connectGraph[index].size()==1)
+			inamovible.reset(*k);
+			connectGraph[*k].remove(index);
+			k=connectGraph[index].erase(k);
+		}
+		connecte.reset(index);
+		return true;
+	}
+	else
+	{
+		marquage.reset();
+		//marquage.set(index);
+		bool flag;
+		for(auto i=connectGraph[index].begin();i!=connectGraph[index].end(); i++)
+		{
+			if(*i==0)
+			continue;
+			//cout<<*i<<endl;
+			if(distance[*i]<=distance[index])
+			continue;
+			if(marquage.test(*i))
+			continue;
+			marquage.reset();
+			marquage.set(index);
+			marquage.set(*i);
+			flag=false;
+			localConnect(*i,index,distance[index],flag);
+			if(!flag) //on a pas pu connecter.
+			{
+				//cout<<"normal no cut"<<endl;
+				return false;
+			}
+		}
+		int dist=distance[index];
+		distance[index]=2500;
+		//cout<<"normal cut"<<endl;
+		for(auto i=connectGraph[index].begin(); i!=connectGraph[index].end() ;i++)
+		if(distance[*i]>dist)
+		updateDistance(*i,index);
+		nbCapteurs--;
+		capteurs.reset(index);
+		for(auto k=coverGraph[index].begin(); k!=coverGraph[index].end();)
+		{
+			if(capteurs.test(*k))
+			k++;
+			else
+			{
+				coverGraph[*k].remove(index);
+				k=coverGraph[index].erase(k);
+			}
+		}
+		for(auto k=connectGraph[index].begin(); k!=connectGraph[index].end();)
+		{
+			connectGraph[*k].remove(index);
+			k=connectGraph[index].erase(k);
+		}
+		connecte.reset(index);
+		return true;
+	}
+}
+
+bool Grille::localConnect(int index, int from, int dist, bool & flag) //analyse locale du graphe de connexion
+{
+	bool tree=true;
+	if(connectGraph[index].size()==1)
+	return true; //est sur une feuille
+	for(auto i=connectGraph[index].begin(); i!=connectGraph[index].end(); i++)
+	{
+		if(marquage.test(*i)) //on rencontre un cycle
+		{
+			if(*i!=from)
+			tree=false;
+			continue;
+		}
+		marquage.set(*i);
+		if(distance[*i]<=dist)//on reconnecte avec le puit
+		{
+			flag=true;
+			//tree=false;
+			return false;
+		}
+		else if(localConnect(*i,index,dist,flag)) //un des fils est un arbre (->sommet inamovible au risque de couper la branche)
+		inamovible.set(index);
+		else //un des fils n'est pas un arbre -> index n'est pas dans un arbre (il peut toujours être inamovible)
+		tree=false;
+	}
+	return tree; //si index est inamovible
+}
+
 void Grille::connect(int index)
 {
 	connecte.set(index);
 	for(auto k=connectGraph[index].begin(); k!=connectGraph[index].end(); k++)
-	if(!connecte.test(*k))
-	connect(*k);
+	{
+		if(!connecte.test(*k))
+		connect(*k);
+	}
 }
 
 void Grille::fill()
@@ -158,9 +322,10 @@ void Grille::fill()
 	couvert=maskMatrix;
 	couvert.set(0);
 	connecte.set(0);
+	inamovible.reset();
 	coverGraph=coverNeighGraph;
 	connectGraph=connectNeighGraph;
-
+	distance=distanceMatrix;
 }
 
 string Grille::toString() const
@@ -172,45 +337,86 @@ string Grille::toString() const
 		}
 		ret+='\n';
 	}
-	ret+="Zone couverte\n";
+	/*ret+="Capteurs inamovibles\n";
 	for(int i=0; i<taille; i++){
 		for(int j=0; j<taille; j++){
-			ret+=couvert[i*taille+j]?"1 ":"0 ";
+			ret+=inamovible.test(i*taille+j)?"1 ":"0 ";
 		}
 		ret+='\n';
 	}
-	ret+="Capteurs connectés\n";
+	cout<<"distance\n";
 	for(int i=0; i<taille; i++){
-		for(int j=0; j<taille; j++){
-			ret+=connecte[i*taille+j]?"1 ":"0 ";
-		}
-		ret+='\n';
-	}
-	ret+="Capteurs non connectés\n";
-	for(int i=0; i<taille; i++){
-		for(int j=0; j<taille; j++){
-			ret+=capteurs[i*taille+j] && !connecte[i*taille+j]?"1 ":"0 ";
-		}
-		ret+='\n';
-	}
-	ret+=estRealisable()?"La solution est réalisable.\n":"La solution n'est pas réalisable.\n";
-	ret+=to_string(nbCapteurs);
-	ret+=" capteurs sont utilisés.";
-	return ret;
+	for(int j=0; j<taille; j++){
+	cout<<distance[i*taille+j]<<" ";
+	if(distance[i*taille+j]<10)
+	cout<<"   ";
+	else if(distance[i*taille+j]<100)
+	cout<<"  ";
+	else if(distance[i*taille+j]<1000)
+	cout<<" ";
+}
+cout<<endl;
+}*/
+/*ret+="Zone couverte\n";
+for(int i=0; i<taille; i++){
+for(int j=0; j<taille; j++){
+ret+=couvert[i*taille+j]?"1 ":"0 ";
+}
+ret+='\n';
+}
+ret+="Capteurs connectés\n";
+for(int i=0; i<taille; i++){
+for(int j=0; j<taille; j++){
+ret+=connecte[i*taille+j]?"1 ":"0 ";
+}
+ret+='\n';
+}
+ret+="Capteurs non connectés\n";
+for(int i=0; i<taille; i++){
+for(int j=0; j<taille; j++){
+ret+=capteurs[i*taille+j] && !connecte[i*taille+j]?"1 ":"0 ";
+}
+ret+='\n';
+}*/
+ret+=estRealisable()?"La solution est réalisable.\n":"La solution n'est pas réalisable.\n";
+ret+=to_string(nbCapteurs);
+ret+=" capteurs sont utilisés.";
+return ret;
 }
 
 bool Grille::checkCoverCaptor(int index) const
 {
-	bool covered=false;
+	bool self_cover=false;
 	for(auto i=coverGraph[index].begin(); i!=coverGraph[index].end(); i++)
 	{
 		if(coverGraph[*i].size()==1 && !capteurs.test(*i) && *i!=0)
-		return true;
+		return false;
 		if(capteurs.test(*i))
-		covered=true;
+		self_cover=true;
 	}
+	return self_cover;
+}
 
-	return !covered;
+bool Grille::checkConnectCaptor(int index) const
+{
+	bool ok=true;
+	for(auto i=connectGraph[index].begin(); i!=connectGraph[index].end(); i++)
+	{
+		if(distance[index]>=distance[*i])
+		continue;
+		ok=false;
+		for(auto j=connectGraph[*i].begin(); j!=connectGraph[*i].end(); j++)
+		{
+			if(*j!=index && distance[*j]<distance[*i])
+			{
+				ok=true;
+				break;
+			}
+		}
+		if(!ok)
+		break;
+	}
+	return ok;
 }
 
 void Grille::rendRealisable(){
@@ -221,9 +427,12 @@ void Grille::rendRealisable(){
 	fill();
 	for(auto i= permutation.begin(); i!=permutation.end(); i++)
 	{
-		eraseCaptor(*i);
+		/*eraseCaptor(*i);
 		if(!estRealisable())
-		addCaptor(*i);
+		addCaptor(*i);*/
+		eraseIfPossible(*i);
+		//cout<<toString()<<endl;
+		//cin.get();
 	}
 }
 
@@ -559,39 +768,35 @@ void Grille::pivotDestructeur(vector<int> const & capt, vector<int> const & empt
 	fill();
 	std::fill(new_capt.begin(), new_capt.end(), 0);
 	std::fill(new_empty.begin(), new_empty.end(), 0);
-	eraseCaptor(pivot);
+	eraseIfPossible(pivot);
 	new_empty[0]=pivot;
 	int cntcapt=0, cntempty=1;
 	for(int i=0; empty[i]!=0; i++)
 	{
-		eraseCaptor(empty[i]);
-		if(!estRealisable())
-		{
-			new_capt[cntcapt]=empty[i];
-			cntcapt++;
-			addCaptor(empty[i]);
-		}
-		else
+		if(eraseIfPossible(empty[i]))
 		{
 			new_empty[cntempty]=empty[i];
 			cntempty++;
+		}
+		else
+		{
+			new_capt[cntcapt]=empty[i];
+			cntcapt++;
 		}
 	}
 	for(int i=0; capt[i]!=0; i++)
 	{
 		if(capt[i]!=pivot)
 		{
-			eraseCaptor(capt[i]);
-			if(!estRealisable())
-			{
-				new_capt[cntcapt]=capt[i];
-				cntcapt++;
-				addCaptor(capt[i]);
-			}
-			else
+			if(eraseIfPossible(capt[i]))
 			{
 				new_empty[cntempty]=capt[i];
 				cntempty++;
+			}
+			else
+			{
+				new_capt[cntcapt]=capt[i];
+				cntcapt++;
 			}
 		}
 	}
@@ -601,8 +806,8 @@ void Grille::recuitSimule()
 {
 	Grille gbest(*this);
 	double rho=0.85;
-	double T=1.2;
-	int k=nbCapteurs/0.8;
+	double T=1;
+	int k=nbCapteurs*5;
 	int best_score=nbCapteurs;
 	int last_score=best_score,cntcapt=0, cntempty=0, last_iter_score=best_score;
 	if(!estRealisable())
@@ -631,10 +836,11 @@ void Grille::recuitSimule()
 	int cnt=0;
 	while(cnt<2 || T>0.1)
 	{
-		clock_t t0=clock();
-		for(int i=0;clock()-t0<(CLOCKS_PER_SEC*nbCapteurs)/20 || i<k; i++)
+
+		//clock_t t0=clock();
+		for(int i=0;/*clock()-t0<CLOCKS_PER_SEC*0.1 ||*/ i<k; i++)
 		{
-			k=nbCapteurs/0.8;
+			k=nbCapteurs*5;
 			int pivot=rand()%nbCapteurs;
 			random_shuffle(empty.begin(),empty.begin()+taille*taille-1-nbCapteurs);
 			random_shuffle(capt.begin(),capt.begin()+nbCapteurs);
@@ -654,6 +860,7 @@ void Grille::recuitSimule()
 					best_score=last_score;
 					cout<<"new best"<<best_score<<endl;
 					gbest=g;
+					cout<<gbest.structureValue()<<endl;
 				}
 			}
 		}
@@ -834,4 +1041,35 @@ void Grille::VND(){
 		else
 		k++;
 	}
+}
+
+double Grille::structureValue()
+{
+	array<int,50> cntfile;
+	array<int,50> cntrow;
+	std::fill(cntfile.begin(), cntfile.end(),0);
+	std::fill(cntrow.begin(), cntrow.end(),0);
+	double mean=(double)nbCapteurs/(double)taille;
+	for(int i=0; i<taille; i++)
+	{
+		for(int j=0; j<taille; j++)
+		{
+			if(capteurs.test(taille*i+j))
+			{
+				cntrow[i]++;
+				cntfile[j]++;
+			}
+		}
+	}
+	double value=0;
+	for(int i=0; i<taille; i++)
+	{
+		value+=pow(cntfile[i],2);
+		value+=pow(cntrow[i],2);
+	}
+	value/=(double)(2*taille);
+	value-=(double)pow(mean,2);
+	value=sqrt(value);
+	value/=(double)mean;
+	return value;
 }
