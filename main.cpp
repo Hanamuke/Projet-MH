@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 	fstream out;
     out.open("out.txt",fstream::trunc|fstream::out);
 	Grille g(10, 1, 1);
-	/*for(auto i=r.begin(); i!=r.end(); i++)
+	for(auto i=r.begin(); i!=r.end(); i++)
 	{
 		for(auto j=t.begin(); j!=t.end(); j++)
 		{

@@ -4,6 +4,7 @@
 #include <array>
 #include <iostream>
 #include "greedyList.hpp"
+#include <ctime>
 
 using namespace std;
 
@@ -46,6 +47,7 @@ private:
 
 public:
 	Grille(int t, int _rCapt, int _rCom);
+	void fromBitset(bitset<2500>& capt);
 	//remplie la grille de capteurs.
 	void fill();
 	// à appeler sur 0
@@ -62,6 +64,7 @@ public:
 	//ajoute un capteur aux coordonnées souhaitées et met à jour les graphes
 	void addCaptor(int i, int j);
 	void addCaptor(int index);
+	bitset<2500> getCapteurs(){return capteurs;}
 	//supprime un capteur aux coordonnées souhaitées et met à jour les graphes
 	void eraseCaptor(int i, int j);
 	void eraseCaptor(int index);
@@ -75,6 +78,7 @@ public:
 	pair<int,int> plusProcheConnecte(int i, int j);
 	//Supprime des points aléatoirement pour en replacer d'autres
 	void randomDelete(int n);
+	void videGrille();
 	//Renvoie une grille realisable à partir de la grille en cours
 	void transRealisable();
 	//donne le vecteur des sommets dans la meme composante connexe pour la connectivité
@@ -93,6 +97,7 @@ public:
 	void voisinageTroisLigneEtColonne();
 	//Recherche une meilleure solution dans un voisinage 2 flip et s'arrete à la premiere amélioration
 	void voisDeuxLigneEtColonnePourVND();
+	void voisinageLigneEtColonneLimitee(clock_t tempsInitial, float temps);
 	void VND();
 	void flipColonneOuLigne(bool colonne, int n);
 	//methode de base de l'heuristique destructrice
@@ -107,6 +112,10 @@ public:
 	//de index ne posent pas de problème non plus. L'analyse local permet également l'obtention d'information sur les sommets inamovibles.
 	//Retourne true si les composantes connexes voisines de index (autres que celle de from), sont des arbres.
 	bool localConnect(int index, int from, int distance, bool & flag);
+	void descenteLocale();
+	// Descente Locale qui s'arrête au bout d'un certain temps si c'est trop long
+	void descenteLocaleLimitee(float temps);
+	void poseCapteursAleatoires(int n);
 
 	Grille& operator=(Grille &arg) // copy/move constructor is called to construct arg
 	{
