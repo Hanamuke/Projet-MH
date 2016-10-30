@@ -1,0 +1,19 @@
+\select@language {french}
+\contentsline {part}{I\hspace {1em}Sujet}{2}
+\contentsline {section}{\numberline {1}Mod\IeC {\'e}lisation}{2}
+\contentsline {section}{\numberline {2}Reformulation}{2}
+\contentsline {section}{\numberline {3}D\IeC {\'e}tails d'impl\IeC {\'e}mentation}{3}
+\contentsline {part}{II\hspace {1em}Approche par cha\IeC {\^\i }nes de destruction}{5}
+\contentsline {section}{\numberline {4}Heuristique}{6}
+\contentsline {subsection}{\numberline {4.1}Heuristique d\IeC {\'e}terministe}{6}
+\contentsline {subsection}{\numberline {4.2}Heuristique al\IeC {\'e}atoire}{7}
+\contentsline {section}{\numberline {5}Les cha\IeC {\^\i }nes de destruction}{8}
+\contentsline {subsection}{\numberline {5.1}D\IeC {\'e}finition}{8}
+\contentsline {subsection}{\numberline {5.2}Propri\IeC {\'e}t\IeC {\'e}s}{9}
+\contentsline {subsubsection}{\numberline {5.2.1}Cha\IeC {\^\i }ne de destruction d'une solution non d\IeC {\'e}g\IeC {\'e}n\IeC {\'e}r\IeC {\'e}e}{9}
+\contentsline {paragraph}{D\IeC {\'e}finitions et \IeC {\'e}nonc\IeC {\'e}}{9}
+\contentsline {paragraph}{D\IeC {\'e}monstration}{9}
+\contentsline {subsubsection}{\numberline {5.2.2}Cha\IeC {\^\i }nes \IeC {\'e}quivalentes}{10}
+\contentsline {section}{\numberline {6}Voisinage induit}{11}
+\contentsline {subsection}{\numberline {6.1}D\IeC {\'e}finition et propri\IeC {\'e}t\IeC {\'e}s}{11}
+\contentsline {subsection}{\numberline {6.2}Exemple}{12}
