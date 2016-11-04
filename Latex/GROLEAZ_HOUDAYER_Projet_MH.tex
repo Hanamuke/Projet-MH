@@ -112,7 +112,7 @@ Bien sûr, cela ne garantit pas l'obtention d'une meilleur solution mais donne e
 
 \section{Les chaînes d'exclusion}
 \subsection{Définition}
-Dans notre problème, $S$ représente un ensemble de sommets. Au début de la méthode, $S$ comprend la totalité des sommets disponibles, puis on essaye un à un de les exclure de $S$. Voyons comment cette méthode peut être étendue formellement à une classe de problème plus large.
+Dans notre problème, $S$ représente un ensemble de sommets. Au début de la méthode, $S$ comprend la totalité des sommets disponibles, puis on essaye un à un de les exclure de $S$. Voyons comment cette méthode peut être étendue formellement à une classe de problèmes plus large.
 
 \subsubsection{Définition générale}
 Soit $(P)$ un problème d'optimisation réalisable (dont l'ensemble des solutions réalisables est non vide), dont chaque solution réalisable ou non peut être encodée par un ensemble $S\subset \Sigma \;\text{fini}$, et dont tout $S\subset \Sigma$ encode une solution. On peut donc confondre solutions et sous-ensembles de $\Sigma$. On exige également que $(P)$  vérifie la propriété de transitivité suivante :
@@ -137,7 +137,7 @@ On a bien montré que notre problème vérifiait la propriété de transitivité
 \subsection{Propriétés}
 \subsubsection{Chaînes d'exclusion et solutions non dégénérées}
 
-On reprend dans cette partie la classe de problèmes plus générale, avec les notation alors introduites.
+On reprend dans cette partie la classe de problèmes plus générale, avec les notations alors introduites.
 
  \paragraph{Solution dégénérée}
  
@@ -169,7 +169,7 @@ Expliquons d'abord l'essence de cette propriété. On souhaite montrer que si on
 On a donc démontré que pour chaque solution non dégénérée on pouvait construire facilement une chaîne d'exclusion qui la génère, et donc qu'il en existe une. On peut donc en toute légitimité encoder un solution non dégénérée par une de ses chaînes d'exclusion. Supposons maintenant que le retrait d'éléments dans $S$ améliore toujours la fonction objectif (dans un sens ou dans l'autre suivant si l'on maximise ou minimise), les solution optimales sont alors non dégénérées et les solution non dégénérées sont en un sens des optimums locaux. Moralement on démontre que les chaînes d'exclusion sont adaptés pour résoudre un problème qui vérifierait cela, tel que le problème de couverture connexe minimum.  
 
 
-Remarque : Je notais précédemment que notre implémentation u problème de couverture connexe permettait de traiter des variantes avec d'autres définitions de distance. On voit ici que la propriété de construction (et les méthodes qui en découlent) n'est vraie que si la propriété de transitivité est vraie. Or on l'a vu, cette propriété découle de $G_{capt}\subset G_{comm}$ et donc de $R_{capt}\leq R_{comm}$. Il serait donc impossible de travailler avec cette méthode si on avait $R_{comm}<R_{capt}$.
+Remarque : Je notais précédemment que notre implémentation du problème de couverture connexe permettait de traiter des variantes avec d'autres définitions de distance. On voit ici que la propriété de construction (et les méthodes qui en découlent) n'est vraie que si la propriété de transitivité est vraie. Or on l'a vu, cette propriété découle de $G_{capt}\subset G_{comm}$ et donc de $R_{capt}\leq R_{comm}$. Il serait donc impossible de travailler avec cette méthode si on avait $R_{comm}<R_{capt}$.
 \subsubsection{Chaînes équivalentes}
 On retourne désormais sur le problème de couverture connexe minimale.
 \\Lorsqu'on code une solution quelconque, pas forcément réalisable, avec son vecteur binaire, il découle immédiatement que pour une grille de dimension $n$, il existe $2^{n^2}$ solutions possible. De plus, seulement une partie infime de ces solutions, les solution non dégénérées, peut être associée à une chaîne d'exclusion.
