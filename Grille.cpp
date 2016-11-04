@@ -185,7 +185,10 @@ void Grille::eraseCaptor(int index)
 bool Grille::eraseIfPossible(int index)
 {
 	if(!capteurs.test(index))
-	exit(8);
+	{
+		//cout<<toString()<<" test"<<endl;
+		exit(8);
+	}
 	if(!checkCoverCaptor(index))
 	{
 		//cout<<"fast no cut"<<endl;
@@ -214,9 +217,6 @@ bool Grille::eraseIfPossible(int index)
 		}
 		for(auto k=connectGraph[index].begin(); k!=connectGraph[index].end();)
 		{
-			//si le capteur est un feuille, son voisin deviennent a priori amovibles.
-			if(connectGraph[index].size()==1)
-			inamovible.reset(*k);
 			connectGraph[*k].remove(index);
 			k=connectGraph[index].erase(k);
 		}
@@ -834,6 +834,7 @@ void Grille::recuitSimule()
 		cntcapt++;
 	}
 	Grille g(taille, rCapt,rCom);
+	g=*this;
 	int cnt=0;
 	while(cnt<2 || T>0.1)
 	{
@@ -861,7 +862,6 @@ void Grille::recuitSimule()
 					best_score=last_score;
 					cout<<"new best"<<best_score<<endl;
 					gbest=g;
-					cout<<gbest.structureValue()<<endl;
 				}
 			}
 		}

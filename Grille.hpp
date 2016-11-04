@@ -5,6 +5,8 @@
 #include <iostream>
 #include "greedyList.hpp"
 #include <ctime>
+#include <thread>
+#include <mutex>
 
 using namespace std;
 
@@ -137,6 +139,7 @@ public:
 	string toString() const;
 	//réinitialise toutes les variables statiques, pour changer d'instance du problème.
 	static void reset();
-
-
+	//recuit multi_thread
+	void mtrecuit();
+	void thread_recuit(array<bool,8> & flag_this, array<bool,8> & flag_T,double & T, Grille & best,int & cnt, mutex & m, int id);
 };

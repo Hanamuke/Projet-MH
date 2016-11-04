@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (MiKTeX 2.9) (preloaded format=pdflatex 2015.10.22)  31 OCT 2016 11:39
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (MiKTeX 2.9) (preloaded format=pdflatex 2015.10.22)  4 NOV 2016 14:52
 entering extended mode
 **GROLEAZ_HOUDAYER_Projet_MH.tex
 (GROLEAZ_HOUDAYER_Projet_MH.tex
@@ -383,21 +383,21 @@ Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
 \Gin@req@width=\dimen116
 )
 (GROLEAZ_HOUDAYER_Projet_MH.aux)
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Info: Redefining \degres on input line 12.
-LaTeX Info: Redefining \dots on input line 12.
-LaTeX Info: Redefining \up on input line 12.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 17.
+LaTeX Font Info:    ... okay on input line 17.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 17.
+LaTeX Font Info:    ... okay on input line 17.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 17.
+LaTeX Font Info:    ... okay on input line 17.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 17.
+LaTeX Font Info:    ... okay on input line 17.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 17.
+LaTeX Font Info:    ... okay on input line 17.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 17.
+LaTeX Font Info:    ... okay on input line 17.
+LaTeX Info: Redefining \degres on input line 17.
+LaTeX Info: Redefining \dots on input line 17.
+LaTeX Info: Redefining \up on input line 17.
 
 ("C:\Program Files (x86)\MiKTeX\tex\context\base\supp-pdf.mkii"
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -413,50 +413,42 @@ LaTeX Info: Redefining \up on input line 12.
 \makeMPintoPDFobject=\count110
 \everyMPtoPDFconversion=\toks23
 )
-LaTeX Font Info:    Try loading font information for U+msa on input line 13.
+LaTeX Font Info:    Try loading font information for U+msa on input line 18.
  ("C:\Program Files (x86)\MiKTeX\tex\latex\amsfonts\umsa.fd"
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 13.
+LaTeX Font Info:    Try loading font information for U+msb on input line 18.
 
 ("C:\Program Files (x86)\MiKTeX\tex\latex\amsfonts\umsb.fd"
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-(GROLEAZ_HOUDAYER_Projet_MH.toc)
-\tf@toc=\write3
- [1
+(GROLEAZ_HOUDAYER_Projet_MH.toc [1
 
-{C:/Users/Hanamuke/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}]
-<Images/4_1_1_realisable.jpg, id=11, 273.4215pt x 166.82326pt>
+{C:/Users/Hanamuke/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}])
+\tf@toc=\write3
+ [2]
+<Images/4_1_1_realisable.jpg, id=19, 273.4215pt x 166.82326pt>
 File: Images/4_1_1_realisable.jpg Graphic file (type jpg)
 
 <use Images/4_1_1_realisable.jpg>
-Package pdftex.def Info: Images/4_1_1_realisable.jpg used on input line 28.
+Package pdftex.def Info: Images/4_1_1_realisable.jpg used on input line 34.
 (pdftex.def)             Requested size: 273.4208pt x 166.82285pt.
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[2] <Images/4_1_2_captgraph.jpg, id=20, 275.22826pt x 178.266pt>
+ [3 <./Images/4_1_1_realisable.jpg>]
+<Images/4_1_2_captgraph.jpg, id=25, 275.22826pt x 178.266pt>
 File: Images/4_1_2_captgraph.jpg Graphic file (type jpg)
 
 <use Images/4_1_2_captgraph.jpg>
-Package pdftex.def Info: Images/4_1_2_captgraph.jpg used on input line 45.
+Package pdftex.def Info: Images/4_1_2_captgraph.jpg used on input line 53.
 (pdftex.def)             Requested size: 275.22758pt x 178.26555pt.
 
-<Images/4_1_2_commgraph.jpg, id=21, 271.0125pt x 181.8795pt>
+<Images/4_1_2_commgraph.jpg, id=26, 271.0125pt x 181.8795pt>
 File: Images/4_1_2_commgraph.jpg Graphic file (type jpg)
 
 <use Images/4_1_2_commgraph.jpg>
-Package pdftex.def Info: Images/4_1_2_commgraph.jpg used on input line 47.
+Package pdftex.def Info: Images/4_1_2_commgraph.jpg used on input line 55.
 (pdftex.def)             Requested size: 271.01183pt x 181.87904pt.
-
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-[3 <./Images/4_1_1_realisable.jpg>] [4 <./Images/4_1_2_captgraph.jpg> <./Images
-/4_1_2_commgraph.jpg>]
-Overfull \hbox (1.56735pt too wide) in paragraph at lines 63--64
+ [4 <./Images/4_1_2_captgraph.jpg> <./Images/4_1_2_commgraph.jpg>]
+Overfull \hbox (1.56735pt too wide) in paragraph at lines 71--72
 []\T1/cmr/m/n/12 Nous gar-dons éga-le-ment en mé-moire en per-ma-nence, les gra
 phes $\OML/cmm/m/it/12 G[]\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 S\OT1/cmr/m/n/12 )$
 
@@ -466,47 +458,52 @@ phes $\OML/cmm/m/it/12 G[]\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 S\OT1/cmr/m/n/12 )$
 File: Images/4_1_1_naif.jpg Graphic file (type jpg)
 
 <use Images/4_1_1_naif.jpg>
-Package pdftex.def Info: Images/4_1_1_naif.jpg used on input line 83.
+Package pdftex.def Info: Images/4_1_1_naif.jpg used on input line 91.
 (pdftex.def)             Requested size: 272.81857pt x 181.87904pt.
- [6 <./Images/4_1_1_naif.jpg>]
-<Images/4_1_1_random.jpg, id=37, 291.489pt x 186.6975pt>
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[6] <Images/4_1_1_random.jpg, id=37, 291.489pt x 186.6975pt>
 File: Images/4_1_1_random.jpg Graphic file (type jpg)
 
 <use Images/4_1_1_random.jpg>
-Package pdftex.def Info: Images/4_1_1_random.jpg used on input line 97.
+Package pdftex.def Info: Images/4_1_1_random.jpg used on input line 105.
 (pdftex.def)             Requested size: 291.48828pt x 186.69704pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[7] [8 <./Images/4_1_1_random.jpg>]
-Overfull \hbox (1.85011pt too wide) in paragraph at lines 122--124
- \T1/cmr/bx/n/12 Dé-mons-tra-tions[] \T1/cmr/m/n/12 Com-men-çons par mon-trer l
-a pre-mière pro-priété, par l'ab-
- []
-
-[9] [10] [11]
+[7 <./Images/4_1_1_naif.jpg>] [8 <./Images/4_1_1_random.jpg>] [9] [10] [11]
+[12]
 File: Images/4_1_1_naif.jpg Graphic file (type jpg)
  <use Images/4_1_1_naif.jpg>
-Package pdftex.def Info: Images/4_1_1_naif.jpg used on input line 178.
+Package pdftex.def Info: Images/4_1_1_naif.jpg used on input line 208.
 (pdftex.def)             Requested size: 272.81857pt x 181.87904pt.
- [12]
-<Images/4_1_1_neigh.jpg, id=59, 290.2845pt x 196.93575pt>
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[13] <Images/4_1_1_neigh.jpg, id=63, 290.2845pt x 196.93575pt>
 File: Images/4_1_1_neigh.jpg Graphic file (type jpg)
 
 <use Images/4_1_1_neigh.jpg>
-Package pdftex.def Info: Images/4_1_1_neigh.jpg used on input line 198.
+Package pdftex.def Info: Images/4_1_1_neigh.jpg used on input line 228.
 (pdftex.def)             Requested size: 290.28378pt x 196.93524pt.
- [13 <./Images/4_1_1_neigh.jpg>]
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[14] [15 <./Images/4_1_1_neigh.jpg>] [16] [17] [18] [19] [20] [21]
 (GROLEAZ_HOUDAYER_Projet_MH.aux) ) 
 Here is how much of TeX's memory you used:
  3555 strings out of 493673
  44682 string characters out of 3143140
- 107287 words of memory out of 3000000
+ 119328 words of memory out of 3000000
  6851 multiletter control sequences out of 15000+200000
  20820 words of font info for 56 fonts, out of 3000000 for 9000
  1025 hyphenation exceptions out of 8191
- 28i,7n,30p,1225b,439s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 28i,8n,30p,1208b,439s stack positions out of 5000i,500n,10000p,200000b,50000s
  <C:\Users\Hanamuke\AppData\Local\MiKTeX\2.9\
 fonts\pk\ljfour\jknappen\ec\dpi600\eccc1200.pk> <C:\Users\Hanamuke\AppData\Loca
 l\MiKTeX\2.9\fonts\pk\ljfour\jknappen\ec\dpi600\ecbx2488.pk> <C:\Users\Hanamuke
@@ -524,9 +521,9 @@ e1/public/amsfonts/cm/cmr6.pfb><C:/Program Files (x86)/MiKTeX/fonts/type1/publi
 c/amsfonts/cm/cmr8.pfb><C:/Program Files (x86)/MiKTeX/fonts/type1/public/amsfon
 ts/cm/cmsy10.pfb><C:/Program Files (x86)/MiKTeX/fonts/type1/public/amsfonts/cm/
 cmsy8.pfb>
-Output written on GROLEAZ_HOUDAYER_Projet_MH.pdf (13 pages, 312772 bytes).
+Output written on GROLEAZ_HOUDAYER_Projet_MH.pdf (21 pages, 348152 bytes).
 PDF statistics:
- 380 PDF objects out of 1000 (max. 8388607)
+ 423 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  31 words of extra memory for PDF output out of 10000 (max. 10000000)
 
