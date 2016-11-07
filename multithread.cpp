@@ -5,26 +5,27 @@
 #include <functional>
 #include <ctime>
 using namespace std;
+//générateur aléatoires thread safe
 array<minstd_rand0,8>  gen;
 void Grille::mtrecuit()
 {
     mutex m;
     Grille best(taille,rCapt,rCom);
     best=*this;
-    array<bool,8> flag_this;
-    array<bool,8> flag_T;
+    array<bool,8> flag_this; //flag de modification de this
+    array<bool,8> flag_T; //falg de modification de la température
     int cnt=0;
-    double T=1;
-    for(int i=0; i<8; i++)
+    double T=1; //température initiale
+    for(int i=0; i<8; i++) //initialisations
     {
         flag_this[i]=false;
         flag_T[i]=false;
         gen[i]=minstd_rand0(rand());
     }
     list<thread> t;
-    for(int i=0; i<8; i++)
+    for(int i=0; i<8; i++) //lancement des 8 theads.
     t.emplace_back(&Grille::thread_recuit,this,ref(flag_this),ref(flag_T),ref(T),ref(best),ref(cnt),ref(m),i);
-    for(auto i=t.begin(); i!=t.end(); i++)
+    for(auto i=t.begin(); i!=t.end(); i++)//attente de la fin des thread
     i->join();
     *this=best;
 }
@@ -45,7 +46,7 @@ void Grille::thread_recuit(array<bool,8> & flag_this, array<bool,8> & flag_T,dou
     vector<int> temp_empty;
     temp_empty.resize(taille*taille-1);
     m.lock();
-    ////////
+    //////// section critique : initialisation des listes de capteurs
     for(int i=1; i<taille*taille; i++)
     if(!capteurs.test(i))
     {
@@ -66,17 +67,16 @@ void Grille::thread_recuit(array<bool,8> & flag_this, array<bool,8> & flag_T,dou
     {
         for(int i=0; i<k; i++)
         {
-            if(capt[N]!=0)
-            exit(131);
             k=ceil(N*0.25);
-            int pivot=gen[id]()%N;
+            int pivot=gen[id]()%N; //tirage au sort du capteur à enlever
+            //shuffle des listes de capteurs et de non capteur :  pas certain que ce soit thread safe mais j'ai pas eu de problèmes
             random_shuffle(empty.begin(),empty.begin()+taille*taille-1-N);
             random_shuffle(capt.begin(),capt.begin()+N);
-            g.pivotDestructeur(capt,empty,temp_capt,temp_empty,capt[pivot]);
-            m.lock();
+            g.pivotDestructeur(capt,empty,temp_capt,temp_empty,capt[pivot]);//génération de la nouvelle solution
+            m.lock(); /////// SECTION CRITIQUE
             double lambda=exp((double)(N-g.getNbCapteurs())/T);
             int p=100*lambda;
-            if(g.getNbCapteurs()<best.getNbCapteurs())
+            if(g.getNbCapteurs()<best.getNbCapteurs()) // si on a trouvé une solution améliorante on met a jour
             {
                 capt=temp_capt;
                 empty=temp_empty;
@@ -90,7 +90,7 @@ void Grille::thread_recuit(array<bool,8> & flag_this, array<bool,8> & flag_T,dou
                 N=best.getNbCapteurs();
 
             }
-            if(flag_this[id])
+            if(flag_this[id]) //si la solution a été modifiée on abandonne notre calcul et on prend la nouvelle solution
             {
                 flag_this[id]=false;
                 cntempty=0;
@@ -118,23 +118,24 @@ void Grille::thread_recuit(array<bool,8> & flag_this, array<bool,8> & flag_T,dou
                 }
                 N=nbCapteurs;
             }
-            else if(rand()%100<p)
+            else if(rand()%100<p) // sinon si on veut modifier la solution on le fait.
             {
                 capt=temp_capt;
                 empty=temp_empty;
-                //*this=g;
-                //for(int j=0; j<8; j++)
-                //if(j!=id)
-                //flag_this[j]=true;
-                //N=nbCapteurs;
-                N=g.getNbCapteurs();
+                *this=g;
+                for(int j=0; j<8; j++)
+                if(j!=id)
+                flag_this[j]=true;
+                N=nbCapteurs;
             }
             m.unlock();
+            ////////////
         }
+        //SECTION CRITIQUE
         m.lock();
         if(flag_T[id])
         flag_T[id]=false;
-        else
+        else //si la température n'a pas déja changé on peut la changer
         {
             cnt++;
             T*=rho;
@@ -143,7 +144,8 @@ void Grille::thread_recuit(array<bool,8> & flag_this, array<bool,8> & flag_T,dou
             if(j!=id)
             flag_T[j]=true;
         }
-        stop_flag=T>0.1 || cnt<2;
+        stop_flag=T>0.1 || cnt<2; //on regarde si on s'arrete
         m.unlock();
+        ////////
     }
 }
