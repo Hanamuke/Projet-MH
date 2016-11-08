@@ -366,6 +366,116 @@ La troisième solution est de laisser les threads chercher indépendamment jusqu
 \\Au premier abord il semblerait que beaucoup de temps de calcul est gaspillé avec cette technique mais elle obtient les meilleurs résultats en pratique (voir annexe). On peut peut-être interpréter cela comme étant le  résultat d'un meilleure synergie entre les threads, comme ils cherchent dans une direction plus commune, la recherche est plus organisée en somme.
 
 N.B: Les tests ont été effectués sous les même conditions d'arrêts et de température que les tests sans parallélisation. Seul le coefficient de proportionnalité entre nombre de capteurs et nombre d'itérations par palier $K$ varie. 
+
+\part{Approche par méthode constructive}
+Dans toute cette partie, on illustrera les méthodes présentées sur l'instance $(P)$ du problème de largeur $5$ et de hauteur $4$ avec $R_{capt}=R_{comm}=1$.
+\section{Heuristique}
+\subsection{Principe de l'algorithme}
+A l'inverse de ce que l'on faisait pour les chaînes d'exclusion nous réalisons cette fois-ci une méthode constructive plutôt qu'une méthode destructive. Cela signifie que l'on part d'une grille qui ne contient aucun capteur, qu'on la parcourt puis qu'on rajoute un capteur à chaque fois qu'une cible n'est pas captée. Ensuite on parcourt notre ensemble de capteurs, et pour chaque capteur non relié au puits, on cherche le capteur qui soit le plus proche de lui et qui soit connecté au puits pour ensuite les relier en posant de nouveaux capteurs entre les deux.
+Cette heuristique a l'avantage d'être une heuristique de réparation, c'est-à-dire qu'elle permet de trouver une solution réalisable à partir d'une autre solution qui ne l'est pas.
+\begin{figure}[h]
+\center
+\includegraphics[scale=1]{Images/Intro_heur.png}
+\caption{Exemple pour expliquer l'application de l'heuristique}
+\end{figure}
+
+Commentaires : 
+\begin{itemize}
+\item Lorsqu'on parcourt notre grille et que l'on arrive en I, on voit que la cible n'est pas couverte donc on y place un capteur. 
+\item S'il on s'intéresse maintenant à la question de la connexion sur le même graphe: en arrivant au point P on voit que celui-ci n'est pas connecté, on le connecte au plus proche point connecté, à savoir M, en posant des capteurs en N et O.
+\end{itemize} 
+
+\subsection{Raffinement technique}
+Plusieurs améliorations peuvent être apportées à l'algorithme ci-dessus afin d'améliorer les résultats: 
+\begin{itemize}
+\item Lorsqu'on rencontre une cible non couverte lors de notre parcours initial, au lieu de poser un capteurs dessus on peut essayer d'optimiser le placement du capteur pour qu'il couvre non seulement la cible en question mais également un maximum d'autres cibles qui ne seraient pas couvertes. Pour ce faire, nous avons utiliser une fonction qui étant donné une cible non couverte $c_i$, cherche, à une distance au plus $R_{capt}$ de $c_i$, la cible la plus éloignée de $c_i$ qui ne soit pas couverte. C'est sur cette nouvelle cible que l'on pose notre capteur. Dans l'exemple précédent on placerait le nouveau capteur en K plutôt qu'en I.
+\item Lors du parcours de notre ensemble de capteurs, si l'on croise un capteur non connecté $c_i$, au lieu de chercher le plus proche voisin connecté, nous commençons par regarder tous les voisins qui sont dans la même composante connexe que lui pour le graphe de communication, c'est-à-dire tous les capteurs avec qui il peut communiquer (directement ou par le biais d'autre capteurs). Comme $c_i$ n'est pas connecté, aucun des capteurs de sa composante connexe ne l'est. On cherche alors le capteurs $c_j$ le plus proche de la composante connexe (qu'il soit connecté au puits ou non). On relie alors la composante connexe à $c_j$ en plaçant des capteurs entre les deux (un capteur tous les $R_{comm}$). Ensuite, si $c_j$ était connecté au puit alors on a fini, sinon on réitère sur notre nouvelle composante (la composante dans laquelle se trouvait $c_i$ et la composante dans laquelle se trouvait $c_j$ qui n'en forme plus qu'une puisqu'on les a reliées. Sur l'exemple précédent on voit que pour relier la composante connexe dans laquelle se trouve P au puits, il suffit de placer un capteur en Q (ou en N).
+\item Comme on rajoute des capteurs pour la connexion après avoir ajouté ceux pour la captation, il est possible que certains capteurs soient redondants. Pour éviter d'avoir trop de capteurs, on applique l'heuristique destructrice décrite dans la partie précédente : pour chaque capteurs, on essaye de voir s'il est indispensable, et s'il ne l'est pas on le supprime. 
+\end{itemize}
+
+\section{Voisinage}
+Nous avons d'abord étudié ces voisinages, mais ils n'interviennent pas dans nos solutions finales. Que ce soit pour le recuit simulé ou avec l'algorithme génétique, l'application de la VND, décrite ci-dessous, sur les solutions retournée par les deux algorithme ne donne jamais de meilleure solution : les solutions sont déjà des optimums locaux pour les voisinages 1-flip et 2-flip. 
+\subsection{Voisinage 1-flip}
+Comme nous avons décrit une heuristique de réparation précédemment, nous pouvons utiliser le voisinage suivant : étant donné une grille avec la position des capteurs, nous choisissons une ligne ou une colonne. Nous parcourons alors cette ligne ou cette colonne et, pour chaque position rencontrée, s'il y a un capteur nous l'enlevons, sinon nous en plaçons un. Cela ne donne pas nécessairement une solution réalisable. Nous appliquons alors l'heuristique de réparation pour trouver la solution réalisable associée (l'heuristique est déterministe ce qui signifie que pour une grille donnée il existe une unique grille réalisable qui puisse être obtenue par application de l'heuristique de réparation).
+\begin{figure}[h]
+\center
+\includegraphics[scale=1]{Images/1_flip.png}
+\caption{Exemple de voisinage 1-flip avant l'application de l'heuristique de réparation}
+\end{figure}
+
+\subsection{Voisinage k-flip}
+Le voisinage précédent s'étend facilement à un voisinage k-flip avec $k \geq 1$ : au lieu de choisir une ligne ou une colonne de la grille pour placer ou enlever des capteurs, nous en choisissons k. Puis après avoir flipper ces k lignes et colonnes nous appliquons l'heuristique de réparation.
+\subsection{VND}
+Ces voisinages successifs et de plus en plus grand sont particulièrement propice à la mise en place d'une VND. Dans la pratique nous avons remarqué qu'on otptimum local pour les voisinnages1-flip et 2-flip l'était toujours pour le voisinnage 3-flip. La VND se contente donc des voisinages 1-flip et 2-flip. 
+
+\section{Algorithme Génétique}
+\subsection{Génération de Solution}
+Afin d'avoir une population initiale variée nous utilisons la méthode suivante. Nous plaçons des capteurs aléatoirement sur la grille (en dehors du puits) puis nous appliquons l'heuristique de réparation vue précédemment.
+En pratique nous générons 100 individus initialement pour les petites grilles (de taille 10 à 30) et 32 pour les grandes grilles (de taille 40 et 50).
+\subsection{Sélection des individus}
+Parmi les individus générés initialement nous n'en gardons que la moitié. La sélection se fait selon une roue de fortune : pour chaque individu i nous calculons l'exponentielle de la différence entre le nombre de capteurs du plus mauvais individu de la population (celui qui a le plus de capteurs) et le nombre de capteurs de l'individu i. L'individu 1 reçoit alors la valeur de cette exponentielle, l'individu 2 reçoit la somme de son exponentielle et de celle de l'individu 1, l'individu 3 reçoit la somme des exponentielle des individus 1, 2 et 3, etc... Le dernier individu reçoit la somme S de toutes les exponentielles. Nous tirons alors un réel r aléatoirement entre 0 et S et l'individu qui a la plus proche valeur supérieur à r est sélectionné. Nous réitérons le procédé jusqu'à obtention du bon nombre d'individu. 
+Pour cette sélection nous avons testé différentes approches, avant de conclure que l’exponentielle était le meilleure choix. D'abord nous avons essayé de sélectionné seulement les meilleurs individus. Cette méthode pose problème dans la mesure où, après quelques générations, toutes les solutions finissent par être identiques. Nous avons également essayé, au lieu de prendre l’exponentielle de la différence, de prendre le carré ou le cube de la différence. Le problème dans ces cas est que la sélection est proche d'une sélection uniforme sur les individus, c'est-à-dire qu'elle ne prend que très peu en compte les écarts de valeurs entre les individus. Par conséquent nous ne convergeons pas vers de bonnes solutions. 
+
+\subsection{Mariage et accouplement}
+Afin de créer une nouvelle génération à partir de l'ancienne nous appliquons l'algorithme suivant : 
+\begin{itemize}
+\item Nous sélectionnons deux individus $p_1$ et $p_2$ de l'ancienne génération
+\begin{figure}[h]
+\center
+\includegraphics[scale=1]{Images/p_1.png}
+\caption{Exemple pour $p_1$}
+\includegraphics[scale=1]{Images/p_2.png}
+\caption{Exemple pour $p_2$}
+\end{figure}
+
+\item Nous recherchons un point $i_1$ de $p_1$ sur lequel est placé un capteur et un point $i_2$ de $p_2$ sur lequel est également placé un capteur. Dans l'exemple $i_1$ est le point M et $i_1$ le point S.
+\item Pour chacun le point $i_1$ nous recherchons le sous-arbre $A_1$ de l'arbre de communication de $p_1$ dont $i_1$ est la racine. C'est-à-dire que nous recherchons la position de tous les capteurs dont le chemin qui les relie au puits passe nécessairement par $i_1$. De même nous recherchons le sous-arbre $A_2$ associé à $i_2$. 
+\begin{figure}[h]
+\center
+\includegraphics[scale=1]{Images/A_1.png}
+\caption{Sous-arbre $A_1$}
+\includegraphics[scale=1]{Images/A_2.png}
+\caption{Sous-arbre $A_2$}
+\end{figure}
+
+\item Nous créons un premier enfant $e_1$ qui a des capteurs au mêmes positions que $p_1$. Nous lui enlevons alors tous les capteurs qui sont dans $A_1$. Puis nous lui ajoutons le sous arbre $A_2$ en lui mettant comme racine la position de $i_1$. 
+\item Il est possible que le sous-arbre $A_2$ avec sa racine en position $i_1$ ne rentre pas dans la grille. Dans ce cas nous lui appliquons une rotation d'angle $frac{\pi}{2}$. On réitère cette rotation tant que le sous-arbre $A_2$ ne rentre pas. Si après quatre rotation nous n'arrivons toujours pas à le faire rentrer, alors nous changeons de point $i_1$ et $i_2$ et nous appliquons à nouveau le procédé.
+\begin{figure}[h]
+\center
+\includegraphics[scale=1]{Images/r_1.png}
+\caption{Sous-arbre $A_2$ sans rotation}
+\includegraphics[scale=1]{Images/r_2.png}
+\caption{Sous-arbre $A_2$ avec une rotation}
+\includegraphics[scale=1]{Images/r_3.png}
+\caption{Sous-arbre $A_2$ avec deux rotations}
+\includegraphics[scale=1]{Images/r_4.png}
+\caption{Sous-arbre $A_2$ avec trois rotations}
+\end{figure} 
+
+\item Évidemment l'enfant $e_2$ est construit de manière symétrique. 
+\begin{figure}[h]
+\center
+\includegraphics[scale=1]{Images/e_1.png}
+\caption{Enfant $e_1$}
+\includegraphics[scale=1]{Images/e_2.png}
+\caption{Enfant $e_2$}
+\end{figure}
+
+\end{itemize}
+
+\subsection{Mutation}
+Une fois les deux enfants $e_1$ et $e_2$ créés, nous leur appliquons une fonction de mutation : nous parcourons l'ensemble de leurs grilles et, pour chaque cible, nous ajoutons un capteur s'il n'y en pas déjà un, avec une probabilité $frac{1}{1000}$, et, s'il y en a déjà un, nous l'enlevons avec la même probabilité. 
+
+\subsection{Nouvelle Génération}
+A chaque fois que l'on veut créer une nouvelle génération nous commençons par engendrer un certain nombre d'enfants (en pratique on réalise un deux fois moins de mariages qu'il y a d'individus). Puis nous appliquons la mutation sur les enfants ainsi engendrés. Ensuite, nous appliquons l'heuristique de réparation sur les enfants afin qu'ils fournissent une solution réalisable. Une fois que nous avons engendré suffisamment d'enfant, nous mélangeons parents et enfants et nous sélectionnons, à l'aide de la méthode décrite précédemment, des individus parmi cet ensemble, de sorte que notre population conserve toujours la même taille d'une génération à l'autre. 
+
+\section{Parallélisation}
+Nous avons pu gagner en temps de calcul en parallélisant cet algorithme génétique. La parallélisation prend place à deux moments de l'algorithme. Premièrement la génération des solutions initiales est une tâche qui se prête très bien à la parallélisation puisque la génération des différents individus de la population est indépendante d'un individu à l'autre.
+L'autre partie qui se prête également bien à la parallélisation est la partie concernant les mariages. Les différents mariages sont indépendants les uns des autres ce qui permet de les traiter sur plusieurs threads distincts. De plus cette opération de mariage est assez lourde, la paralléliser permet donc de gagner de manière conséquente du temps. 
+
+
+
+
 \part{Annexe}
 Tous les résultats sont donnés en nombre de capteurs, en colonne $n$ et les paires $(R_{capt};R_{comm})$ sur les lignes.
 
@@ -391,6 +501,7 @@ Ci-dessous les bornes inférieures calculées à partir des surface en nombres d
 \end{tabular} 
 \end{center}
 
+\section{Tests sur l'approche par les chaînes d'exclusion}
 Tout les tests portants sur l'approche par chaînes d'exclusion ont été effectués sur une machine GE60-0ND équipée d'un i7-3630QM 2.40GHz. 6Go de mémoire RAM étaient disponibles mais en pratique seulement quelques Mo sont nécessaires.
 
 Résultats de l'heuristique destructrice aléatoire. Ces résultats sont produits d'aléa, et fluctuent légèrement d'un exécution à l'autre. Cette heuristique n'est pas vraiment censée être performante d'elle même, les chaînes d'exclusion ont vraiment été pensées pour les voisinages qu'elles produisent, et donc pour être utilisées avec le recuit simulé. 
@@ -545,4 +656,126 @@ En voici les résultats sous la forme moyenne / écart type / meilleur / pire. L
 \hline 
 \end{tabular}
 \end{center}
+
+
+\section{Tests sur l'approche Algorithme Génétique}
+Les tests pour l'algorithme génétique ont été effectués avec processeur i3-4130 3.40GHz. 7Go de mémoire RAM étaient disponibles.
+
+Ce premier tableau donne les résultats pour l'application de la VND après avoir construit une solution à l'aide de l'heuristique de réparation appliquée à une grille vide. Les résultats sont déterministes. 
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+&10 & 15 & 20 & 25 & 30 & 40 & 50\\
+\hline 
+(1;1) & 40 & 82 & 151 & 231 & 327 & 582 & 918 \\ 
+\hline 
+(1;2) & 31 & 73 & 122 & 188 & 284 & 470 & 731 \\ 
+\hline 
+(2;2) & 18 & 37 & 69 & 105 & 144 & 270 & 406 \\ 
+\hline 
+(2;3) & 12 & 27 & 48 & 75 & 108 & 188 & 297 \\ 
+\hline 
+(3;3) & 7 & 17 & 29 & 45 & 68 & 121 & 171 \\ 
+\hline 
+(3;4) & 6 & 14 & 23 & 36 & 51 & 90 & 137 \\ 
+\hline 
+\end{tabular} 
+\end{center}
+
+
+Pour chaque instance du problème, nous avons appliqué dix fois l'algorithme génétique. Les différents résultats pour chaque instance sont répertoriés dans le tableau ci-dessous. On remarque notamment les difficultés pour traiter les problèmes où rCapt et rCom sont petits, ainsi que les bons résultats dans le cas où ils sont plus élevés. 
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+t;rCapt; rCom & Moyenne & Ecart Type & Max & Min & Temps Moyen & Variance Temps\\
+\hline
+10, 1, 1	&	39	&	0,00	&	39	&	39	&	13,3	&	0,05	\\
+\hline
+15, 1, 1	&	79,4	&	0,49	&	80	&	79	&	30,6	&	0,48	\\
+\hline
+20, 1, 1 	&	145,3	&	0,46	&	146	&	145	&	85,9	&	16,43	\\
+\hline
+25, 1, 1	&	227	&	2,53	&	232	&	225	&	199,3	&	114,78	\\
+\hline
+30, 1, 1	&	344,4	&	3,17	&	357	&	318	&	300,1	&	0,00	\\
+\hline
+40, 1, 1	&	587	&	3,74	&	593	&	581	&	493,3	&	114,70	\\
+\hline
+50, 1, 1	&	960	&	12,93	&	984	&	940	&	900,3	&	0,05	\\
+\hline
+10, 1, 2	&	29,1	&	0,30	&	30	&	29	&	11,1	&	0,06	\\
+\hline
+15, 1, 2	&	63,8	&	0,60	&	65	&	63	&	27,7	&	0,15	\\
+\hline
+20, 1, 2	&	111,7	&	0,78	&	113	&	111	&	58,9	&	1,03	\\
+\hline
+25, 1, 2	&	175,6	&	1,43	&	177	&	173	&	119,7	&	4,67	\\
+\hline
+30, 1, 2	&	253,6	&	2,01	&	256	&	249	&	231,7	&	30,06	\\
+\hline
+40, 1, 2	&	452,2	&	1,66	&	455	&	450	&	386,6	&	38,57	\\
+\hline
+50, 1, 2	&	709,1	&	2,95	&	715	&	704	&	900,3	&	0,02	\\
+\hline
+10, 2, 2	&	17	&	0,00	&	17	&	17	&	9,7	&	0,00	\\
+\hline
+15, 2, 2	&	33,6	&	1,20	&	36	&	32	&	22,0	&	0,14	\\
+\hline
+20, 2, 2 	&	61,4	&	1,74	&	65	&	59	&	43,7	&	0,77	\\
+\hline
+25, 2, 2	&	95,1	&	1,58	&	98	&	93	&	81,3	&	6,42	\\
+\hline
+30, 2, 2	&	139,7	&	1,95	&	143	&	136	&	152,2	&	61,48	\\
+\hline
+40, 2, 2	&	252	&	4,17	&	259	&	245	&	168,0	&	8,79	\\
+\hline
+40, 2, 2	&	383,5	&	44,20	&	408	&	252	&	457,6	&	44,36	\\
+\hline
+50, 2, 2	&	50,1	&	114,30	&	393	&	12	&	46,9	&	12,85	\\
+\hline
+15, 2, 3	&	26	&	0,45	&	27	&	25	&	20,2	&	0,01	\\
+\hline
+20, 2, 3	&	45,7	&	0,46	&	46	&	45	&	37,1	&	0,11	\\
+\hline
+25, 2, 3	&	71,4	&	0,80	&	73	&	70	&	62,2	&	0,54	\\
+\hline
+30, 2, 3	&	102,7	&	1,10	&	104	&	101	&	100,4	&	1,88	\\
+\hline
+40, 2, 3	&	185,2	&	1,40	&	187	&	182	&	231,2	&	3,43	\\
+\hline
+50, 2, 3	&	289,1	&	0,94	&	291	&	288	&	268,6	&	8,72	\\
+\hline
+10, 3, 3	&	7	&	0,00	&	7	&	7	&	9,4	&	0,00	\\
+\hline
+15, 3, 3	&	14,8	&	0,40	&	15	&	14	&	19,5	&	0,02	\\
+\hline
+20, 3, 3 	&	27,1	&	0,54	&	28	&	26	&	34,9	&	0,06	\\
+\hline
+25, 3, 3	&	42,7	&	0,64	&	44	&	42	&	57,3	&	0,35	\\
+\hline
+30, 3, 3	&	61,7	&	0,64	&	63	&	61	&	91,0	&	1,99	\\
+\hline
+40, 3, 3	&	115,4	&	1,56	&	118	&	113	&	170,6	&	1,39	\\
+\hline
+50, 3, 3	&	187,9	&	2,07	&	191	&	183	&	200,1	&	9,51	\\
+\hline
+10, 3, 4	&	6	&	0,00	&	6	&	6	&	9,3	&	0,02	\\
+\hline
+15, 3, 4	&	12,4	&	0,49	&	13	&	12	&	19,2	&	0,01	\\
+\hline
+20, 3, 4	&	21,9	&	0,30	&	22	&	21	&	33,6	&	0,03	\\
+\hline
+25, 3, 4	&	33,9	&	0,54	&	35	&	33	&	52,9	&	0,19	\\
+\hline
+30, 3, 4	&	48,5	&	0,67	&	50	&	48	&	79,6	&	0,88	\\
+\hline
+40, 3, 4	&	90	&	1,10	&	91	&	88	&	154,5	&	6,05	\\
+\hline
+50, 3, 4	&	143,9	&	2,30	&	147	&	140	&	184,8	&	12,30	\\
+\hline
+\end{tabular} 
+\end{center}
+
+
 \end{document}
+

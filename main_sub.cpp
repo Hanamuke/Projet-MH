@@ -22,6 +22,14 @@ int main(int argc, char* argv[])
     //décommenter la techniquer à utiliser
     //g.rendRealisable();
     //g.mtrecuit();
+
+    //Population p(taille, rcapt, rcomm, 100, 0.5);
+    //for(int i=0; i<500; i++){
+    //  p.nouvelleGeneration(25);
+    //}
+    //g.videGrille();
+    //g.fromBitset(p.getMeilleurCitoyen());
+    //
     if(!g.verify())
     exit(4);
     clock_t t1=clock();

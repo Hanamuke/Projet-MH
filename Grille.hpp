@@ -7,6 +7,7 @@
 #include <ctime>
 #include <thread>
 #include <mutex>
+#include <set>
 
 using namespace std;
 
@@ -49,6 +50,7 @@ private:
 
 public:
 	Grille(int t, int _rCapt, int _rCom);
+	//Construit la grille pour que les données soient intègres, à partir du bitset des capteurs capt
 	void fromBitset(bitset<2500>& capt);
 	//remplie la grille de capteurs.
 	void fill();
@@ -80,27 +82,35 @@ public:
 	pair<int,int> plusProcheConnecte(int i, int j);
 	//Supprime des points aléatoirement pour en replacer d'autres
 	void randomDelete(int n);
+	// Enlève tous les capteurs de la grille en maintenant l'intégrité des attributs
 	void videGrille();
 	//Renvoie une grille realisable à partir de la grille en cours
 	void transRealisable();
 	//donne le vecteur des sommets dans la meme composante connexe pour la connectivité
 	void compConnexe(bitset<2500>& ciblesReliees, bitset<2500>& capteursReliees, int index);
+	//Sert à augmenter la distance a laquelle on recherche un voisin de la composante connexe
 	void augmenteDistance(bitset<2500>& bi);
+	//Etant donne deux positions de capteurs, place un nombre minimum de capteurs pour relier ces deux capteurs pour la connexion
 	void ajouteCapteursPourRelier(int l1, int c1, int l2, int c2);
 	//renvoie true si la solution est réalisable, en utilisant uniquement capteurs.
 	bool verify();
+	//Relie la composante à laquelle le capteur en position i appartient au puits
+	void relieComposanteAuPuit(int i);
+	// ajoute un capteur le plus éloigné possible de index tout en assurant que index soit couvert
 	void ajouteCapteursPourCouvrir(int index);
+	//Applique la méthode constructive pour toruver une grille réalisable, puis elimine le surplus de capteurs
 	void combineHeur();
 	// recherche de voisinages ameiliorant pour l'heuristique destructrice
 	//void neighImprove();
 	//Recherche une meilleure solution dans un voisinage ou on a flip une  ligne ou une colonne
 	void voisinageLigneEtColonne();
-	void voisinageDeuxLigneEtColonne();
-	void voisinageTroisLigneEtColonne();
+	//Recherche une meilleure solution dans un voisinage ou on a flip trois ligne(s) ou colonne(s)
+	//void voisinageTroisLigneEtColonne();
 	//Recherche une meilleure solution dans un voisinage 2 flip et s'arrete à la premiere amélioration
 	void voisDeuxLigneEtColonnePourVND();
-	void voisinageLigneEtColonneLimitee(clock_t tempsInitial, float temps);
+	// Applique une VND pour les voisinnages 1 et 2 flip (rajouter 3-flip n'améliore pas)
 	void VND();
+	//Flip de manière intègre tous les bits de la ligne n si bool vaut false, de la colonne n sinon
 	void flipColonneOuLigne(bool colonne, int n);
 	//methode de base de l'heuristique destructrice
 	void pivotDestructeur(vector<int> const & capt, vector<int> const & empty, vector<int> & new_capt, vector<int> & new_empty, int pivot);
@@ -114,10 +124,11 @@ public:
 	//de index ne posent pas de problème non plus. L'analyse local permet également l'obtention d'information sur les sommets inamovibles.
 	//Retourne true si les composantes connexes voisines de index (autres que celle de from), sont des arbres.
 	bool localConnect(int index, int from, int distance, bool & flag);
-	void descenteLocale();
-	// Descente Locale qui s'arrête au bout d'un certain temps si c'est trop long
-	void descenteLocaleLimitee(float temps);
+	//Pose de manière intègre et aléatoire n capteurs 
 	void poseCapteursAleatoires(int n);
+	//Donne tous les points dont le chemin pour allé au puits passe par pointCons
+	void sousArbre(int i, int pointCons, vector<pair<int,int>>& elements, set<int>& dejaContenu, bool aAjouter);
+
 
 	Grille& operator=(Grille &arg)
 	{
