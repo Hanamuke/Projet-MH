@@ -18,9 +18,9 @@ private:
 	static array<bitset<2500>,2500> couvertMatrix;
 	//pour chaque sommet, matrice des sommets dans un voisinage rCom
 	static array<bitset<2500>,2500> connecteMatrix;
-	//pour chaque sommet, liste des sommets dans un voisinage rCapt
+	//graphe Gcapt : pour chaque sommet, liste des sommets dans un voisinage rCapt
 	static array<GreedyList<uint16_t>,2500> coverNeighGraph;
-	//pour chaque sommet, liste des sommets dans un voisinage rCom
+	//graphe Gcomm : pour chaque sommet, liste des sommets dans un voisinage rCom
 	static array<GreedyList<uint16_t>,2500> connectNeighGraph;
 	//bitset des sommets que l'on veut capter, utile lorsque taille<50 car taille^2<2500
 	static bitset<2500> maskMatrix;
@@ -36,9 +36,9 @@ private:
 	bitset<2500> connecte;
 	//all-purpose bitset for marking captors
 	bitset<2500> marquage;
-	//pour chaque sommet sans capteur, liste des capteurs qui captent le sommet. Pour chaque sommet avec capteur, équivalent à coverNeighGraph
+	//graphe Gcapt(S) : pour chaque sommet sans capteur, liste des capteurs qui captent le sommet. Pour chaque sommet avec capteur, équivalent à coverNeighGraph
 	array<GreedyList<uint16_t>,2500> coverGraph;
-	//pour chaque sommet avec capteur, liste des capteurs communiquant avec lui (puits inclu)
+	//graphe Gcomm(S) : pour chaque sommet avec capteur, liste des capteurs communiquant avec lui (puits inclu)
 	array<GreedyList<uint16_t>,2500> connectGraph;
 	//distance des capteurs à l'origine
 	//devient invalide sur utilisation de eraseCaptor et addCaptor, à utiliser uniquement avec fill et eraseIfPossible
@@ -92,7 +92,7 @@ public:
 	void ajouteCapteursPourCouvrir(int index);
 	void combineHeur();
 	// recherche de voisinages ameiliorant pour l'heuristique destructrice
-	void neighImprove();
+	//void neighImprove();
 	//Recherche une meilleure solution dans un voisinage ou on a flip une  ligne ou une colonne
 	void voisinageLigneEtColonne();
 	void voisinageDeuxLigneEtColonne();
@@ -119,7 +119,7 @@ public:
 	void descenteLocaleLimitee(float temps);
 	void poseCapteursAleatoires(int n);
 
-	Grille& operator=(Grille &arg) // copy/move constructor is called to construct arg
+	Grille& operator=(Grille &arg)
 	{
 		couvert=arg.couvert;
 		capteurs=arg.capteurs;

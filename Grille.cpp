@@ -41,9 +41,7 @@ Grille::Grille(int t, int _rCapt, int _rCom):taille(t),rCapt(_rCapt),rCom(_rCom)
 				if((k-i)*(k-i)+(l-j)*(l-j)<=rCom*rCom && (i!=k || j!=l)){
 					connecteMatrix[t*i+j].set(t*k+l);
 					connectNeighGraph[i*t+j].push_back(t*k+l);
-					//connecteMatrix[i*t+j].set();
 				}
-				//distanceMatrix[i*t+j]=i+j;
 			}
 		}
 		initializeDistanceMatrix(0);
@@ -58,26 +56,23 @@ Grille::Grille(int t, int _rCapt, int _rCom):taille(t),rCapt(_rCapt),rCom(_rCom)
 	connecte.set(0);
 }
 
-void Grille::initializeDistanceMatrix(int index)
+void Grille::initializeDistanceMatrix(int index) //calcule la distance au puit de tous les sommets, de façon récursive
 {
 	int dist=distanceMatrix[index];
-	if(index!=0)
+	if(index!=0) //  la distance du sommet en cours est le minimum +1 de ses voisins, mais interdit de modifier le puit.
 	{
-		distanceMatrix[index]=2500;
+		distanceMatrix[index]=2500; // à modifier pour utiliser des grilles ou les distance peuvent exceder 2500
 		for(auto i=connectNeighGraph[index].begin(); i!=connectNeighGraph[index].end() ;i++)
 		if(distanceMatrix[*i]<distanceMatrix[index]-1)
 		distanceMatrix[index]=distanceMatrix[*i]+1;
 	}
-	if(distanceMatrix[index]>dist || index==0)
+	if(distanceMatrix[index]>dist || index==0) // si on a changé la distance, on met à jour les voisins. aussi pour index==0 pour le tout premier appel
 	for(auto i=connectNeighGraph[index].begin(); i!=connectNeighGraph[index].end() ;i++)
-	if(*i!=0)
-	{
-		initializeDistanceMatrix(*i);
-	}
-
+	if(*i!=0)// interdit de metter à jour le puits
+	initializeDistanceMatrix(*i);
 }
 
-void Grille::reset()
+void Grille::reset() // vide les variables statiques et indique qu'il faudra les recalculer avec le flag matrixinitialized
 {
 	matrixInitialized=false;
 	for(int i=0; i<2500; i++)
@@ -109,7 +104,7 @@ void Grille::addCaptor(int index)
 	nbCapteurs++;
 	capteurs.set(index);
 	couvert|=couvertMatrix[index];
-	for(auto k=coverNeighGraph[index].begin(); k!=coverNeighGraph[index].end(); k++)
+	for(auto k=coverNeighGraph[index].begin(); k!=coverNeighGraph[index].end(); k++) // ajout des arretes dans Gcapt(S)
 	{
 		if(!capteurs.test(*k)){
 			coverGraph[index].push_back(*k);
@@ -117,7 +112,7 @@ void Grille::addCaptor(int index)
 		}
 	}
 	bool co=false;
-	for(auto k=connectNeighGraph[index].begin(); k!=connectNeighGraph[index].end(); k++)
+	for(auto k=connectNeighGraph[index].begin(); k!=connectNeighGraph[index].end(); k++)// ajout des arretes dans Gcomm(S)
 	{
 		if(capteurs.test(*k)||*k==0){
 			connectGraph[index].push_back(*k);
@@ -127,9 +122,11 @@ void Grille::addCaptor(int index)
 		}
 	}
 	if(co)
-	connect(index);
+	connect(index); // mise a jour de la composante connexe du puits
 }
 
+//similaire à initializeDistanceMatrix avec en plus interdiction de modifier deletedCaptor
+//est appelée lors de la suppression d'un capteur par eraseIfPossible
 void Grille::updateDistance(int index, int deletedCaptor)
 {
 	int dist=distance[index];
@@ -149,7 +146,7 @@ void Grille::eraseCaptor(int i, int j)
 	eraseCaptor(taille*i+j);
 }
 
-void Grille::eraseCaptor(int index)
+void Grille::eraseCaptor(int index) // similaire a addCaptor mais avec des retrait d'arretes
 {
 	if(!capteurs.test(index))
 	return;
@@ -182,24 +179,14 @@ void Grille::eraseCaptor(int index)
 
 }
 
+
 bool Grille::eraseIfPossible(int index)
 {
-	if(!capteurs.test(index))
-	{
-		//cout<<toString()<<" test"<<endl;
-		exit(8);
-	}
-	if(!checkCoverCaptor(index))
-	{
-		//cout<<"fast no cut"<<endl;
-		return false;
-	}
-	if(inamovible.test(index))
-	{
-		//cout<<"fast no cut"<<endl;
-		return false;
-	}
-	if(connectGraph[index].size()==1 || checkConnectCaptor(index))
+	if(inamovible.test(index)) // si on a montré plus tôt  que le capteur était inamovible on ne fait rien.
+	return false;
+	if(!checkCoverCaptor(index)) // si la couverture est violée on ne fait rien
+	return false;
+	if(connectGraph[index].size()==1 || checkConnectCaptor(index)) // si on peut supprimer le capteur sans modifier les distances
 	{
 		//cout<<"fast cut"<<endl;
 		nbCapteurs--;
@@ -226,16 +213,14 @@ bool Grille::eraseIfPossible(int index)
 	else
 	{
 		marquage.reset();
-		//marquage.set(index);
 		bool flag;
-		for(auto i=connectGraph[index].begin();i!=connectGraph[index].end(); i++)
+		for(auto i=connectGraph[index].begin();i!=connectGraph[index].end(); i++) // on essaye de reconnecter les voisins de index
 		{
 			if(*i==0)
 			continue;
-			//cout<<*i<<endl;
 			if(distance[*i]<=distance[index])
 			continue;
-			if(marquage.test(*i))
+			if(marquage.test(*i)) // si on a déjà vu qu'on pouvait reconnecter *i
 			continue;
 			marquage.reset();
 			marquage.set(index);
@@ -243,19 +228,16 @@ bool Grille::eraseIfPossible(int index)
 			flag=false;
 			localConnect(*i,index,distance[index],flag);
 			if(!flag) //on a pas pu connecter.
-			{
-				//cout<<"normal no cut"<<endl;
-				return false;
-			}
+			return false;
 		}
 		int dist=distance[index];
 		distance[index]=2500;
-		//cout<<"normal cut"<<endl;
 		for(auto i=connectGraph[index].begin(); i!=connectGraph[index].end() ;i++)
 		if(distance[*i]>dist)
-		updateDistance(*i,index);
+		updateDistance(*i,index);  //mise à jour des distances des voisins du sommet supprimé
 		nbCapteurs--;
 		capteurs.reset(index);
+		//suppression du capteur
 		for(auto k=coverGraph[index].begin(); k!=coverGraph[index].end();)
 		{
 			if(capteurs.test(*k))
@@ -278,6 +260,9 @@ bool Grille::eraseIfPossible(int index)
 
 bool Grille::localConnect(int index, int from, int dist, bool & flag) //analyse locale du graphe de connexion
 {
+	//dist est la distance au puit du sommet que l'on veut retirer
+	// from est d'où on vient dans notre parcours en profondeur partiel
+	//flag pour renvoyer si on a pu reconnecter
 	bool tree=true;
 	if(connectGraph[index].size()==1)
 	return true; //est sur une feuille
@@ -293,7 +278,6 @@ bool Grille::localConnect(int index, int from, int dist, bool & flag) //analyse 
 		if(distance[*i]<=dist)//on reconnecte avec le puit
 		{
 			flag=true;
-			//tree=false;
 			return false;
 		}
 		else if(localConnect(*i,index,dist,flag)) //un des fils est un arbre (->sommet inamovible au risque de couper la branche)
@@ -301,10 +285,10 @@ bool Grille::localConnect(int index, int from, int dist, bool & flag) //analyse 
 		else //un des fils n'est pas un arbre -> index n'est pas dans un arbre (il peut toujours être inamovible)
 		tree=false;
 	}
-	return tree; //si index est inamovible
+	return tree; //si index est un arbre
 }
 
-void Grille::connect(int index)
+void Grille::connect(int index) //parcours en profondeur tout bête
 {
 	connecte.set(index);
 	for(auto k=connectGraph[index].begin(); k!=connectGraph[index].end(); k++)
@@ -314,7 +298,7 @@ void Grille::connect(int index)
 	}
 }
 
-void Grille::fill()
+void Grille::fill() //rempli la solution de capteurs
 {
 	nbCapteurs=taille*taille-1;
 	capteurs=maskMatrix;
@@ -384,7 +368,7 @@ ret+=" capteurs sont utilisés.";
 return ret;
 }
 
-bool Grille::checkCoverCaptor(int index) const
+bool Grille::checkCoverCaptor(int index) const //on regarde si on peut supprimer la capteur sans compromettre la couverture
 {
 	bool self_cover=false;
 	for(auto i=coverGraph[index].begin(); i!=coverGraph[index].end(); i++)
@@ -397,7 +381,7 @@ bool Grille::checkCoverCaptor(int index) const
 	return self_cover;
 }
 
-bool Grille::checkConnectCaptor(int index) const
+bool Grille::checkConnectCaptor(int index) const //on regarde si supprimer le capteur modifierais les distances
 {
 	bool ok=true;
 	for(auto i=connectGraph[index].begin(); i!=connectGraph[index].end(); i++)
@@ -419,21 +403,15 @@ bool Grille::checkConnectCaptor(int index) const
 	return ok;
 }
 
-void Grille::rendRealisable(){
+void Grille::rendRealisable() //génère une solution au hasard à l'aide d'un chaîne d'exclusion aléatoire
+{
 	vector<int> permutation(taille*taille-1);
 	for(int i=0; i<taille*taille-1; i++)
 	permutation[i]=i+1;
 	random_shuffle(permutation.begin(), permutation.end());
 	fill();
 	for(auto i= permutation.begin(); i!=permutation.end(); i++)
-	{
-		/*eraseCaptor(*i);
-		if(!estRealisable())
-		addCaptor(*i);*/
-		eraseIfPossible(*i);
-		//cout<<toString()<<endl;
-		//cin.get();
-	}
+	eraseIfPossible(*i);
 }
 
 bool Grille::verify()
@@ -649,8 +627,8 @@ void Grille::combineHeur(){
 	}
 
 }
-
-void Grille::neighImprove()
+//recherche de voisinages améliorants, désuet.
+/*void Grille::neighImprove()
 {
 	int best_score=nbCapteurs, cntcapt=0, cntempty=0;
 	if(!estRealisable())
@@ -703,7 +681,7 @@ void Grille::neighImprove()
 			k=capt[cnt];
 		}
 	}
-}
+}*/
 
 
 void Grille::ajouteCapteursPourCouvrir(int index){
@@ -764,6 +742,8 @@ void Grille::voisinageLigneEtColonne(){
 	*this=g3;
 }
 
+
+//génère une solution S a partir de l^e (empty) , l^c (capt) et pivot qui est le sommet auquel on impose d'être à 0 new_capt new_empt pour renvoyer la nouvelle partition
 void Grille::pivotDestructeur(vector<int> const & capt, vector<int> const & empty, vector<int> & new_capt, vector<int> & new_empty, int pivot)
 {
 	fill();
@@ -802,8 +782,8 @@ void Grille::pivotDestructeur(vector<int> const & capt, vector<int> const & empt
 		}
 	}
 }
-
-void Grille::recuitSimule()
+//plutôt utiliser mtrecuit si possible thread_recuit est commenté
+/*void Grille::recuitSimule()
 {
 	Grille gbest(*this);
 	double rho=0.85;
@@ -839,8 +819,7 @@ void Grille::recuitSimule()
 	while(cnt<2 || T>0.1)
 	{
 
-		//clock_t t0=clock();
-		for(int i=0;/*clock()-t0<CLOCKS_PER_SEC*0.1 ||*/ i<k; i++)
+		for(int i=0; i<k; i++)
 		{
 			k=nbCapteurs*5;
 			int pivot=rand()%nbCapteurs;
@@ -875,7 +854,7 @@ void Grille::recuitSimule()
 		cout<<"current score"<<last_score<<endl;
 	}
 	*this=gbest;
-}
+}*/
 
 void Grille::voisinageDeuxLigneEtColonne(){
 	Grille g2=Grille(taille, rCapt, rCom);
@@ -1043,7 +1022,8 @@ void Grille::VND(){
 		k++;
 	}
 }
-
+//j'avais dans l'idée d'avoir un coefficient de structure en prenant la variance du nombre de capteur sur les lignes ou colonnes
+// pas été conclusif
 double Grille::structureValue()
 {
 	array<int,50> cntfile;
@@ -1075,6 +1055,8 @@ double Grille::structureValue()
 	value/=pow(mean,2);
 	return value;
 }
+
+
 void Grille::fromBitset(bitset<2500>& capt){
 	nbCapteurs=0;
 	for(int i=0; i<taille*taille; i++){

@@ -7,7 +7,7 @@ PROG = MH
 #
 # Fichiers sources (NE PAS METTRE les .h ni les .o seulement les .cpp)
 #
-SOURCES = Grille.cpp main.cpp
+SOURCES = Grille.cpp main_sub.cpp multithread.cpp
 
 #
 # Fichiers objets (ne pas modifier sauf si l'extension n'est pas .cpp)
@@ -26,7 +26,7 @@ CXX = c++
 # Exemple: CXXFLAGS= -std=c++11 -Wall -O -I/usr/local/qt/include
 #
 
-CXXFLAGS = -std=c++11 -O2 -funroll-loops -Wall -Werror -Wfatal-errors  -march=native -flto -fuse-linker-plugin
+CXXFLAGS = -std=c++11 -O2 -funroll-loops -Wall -Werror -Wfatal-errors -Wno-unused -march=native -flto -fuse-linker-plugin
 
 #
 # Options de l'editeur de liens

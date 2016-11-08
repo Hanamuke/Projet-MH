@@ -4,11 +4,6 @@
 #include <memory>
 #include <cstring>
 
-//the greedyList is a data structure that is of fixed size, chosen at creation. It is to be used exactly the same way as a list on the front-end.
-//On the back end, it never allocate or deallocate memory, it is thus effectively faster than a list.
-//It is especially useful if you have the possibility to reuse it, i.e. if you'd normally use .clear() on a list.
-//In the particular event of chess programming, or recursive programming that uses lists in general, it is possible to use a single greedylist per depth (and per thread)
-//which is a huge time benefit.
 
 template<typename T>
 class GreedyList
@@ -80,6 +75,14 @@ public:
             erase(i);
             return;
         }
+    }
+    void trunc()//coupe à la taille utilisée
+    {
+        T* newarr= new T[curr_size];
+        memcpy(newarr,arr,curr_size*sizeof(T));
+        delete[] arr;
+        arr=newarr;
+        maxSize=curr_size;
     }
     T& operator[](size_t i){return arr[i];}
     const T& operator[](size_t i) const {return arr[i];}
