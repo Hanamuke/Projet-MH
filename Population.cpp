@@ -14,6 +14,7 @@
 #include <cmath>
 #include <random>
 #include <functional>
+#include <list>
 
 
 Population::Population(int t, int _rCapt, int _rCom, int tailleInitiale, float fractionGardee)
@@ -67,58 +68,6 @@ void Population::genereSolution(int nombre, int numeroSupport, mutex & m){
     
 }
 
-void Population::marieDeuxIndividus(int p1, int p2, bitset<2500>& enfant1, bitset<2500>& enfant2){
-    int l1=rand()%taille;
-    int l2=rand()%taille;
-    int c1=rand()%taille;
-    int c2=rand()%taille;
-    if(l1>l2){
-        int temp=l1;
-        l1=l2;
-        l2=temp;
-    }
-    if(c1>c2){
-        int temp=c1;
-        c1=c2;
-        c2=temp;
-    }
-    for(int l=0; l<taille; l++){
-        for(int c=0; c<taille; c++){
-            if(l1<=l && l<=l2 && c1<=c && c<=c2){
-                enfant1[l*taille+c]=popul[p2][l*taille+c];
-                enfant2[l*taille+c]=popul[p1][l*taille+c];
-            }
-            else{
-                enfant1[l*taille+c]=popul[p1][l*taille+c];
-                enfant2[l*taille+c]=popul[p2][l*taille+c];    
-            }
-        }
-    }
-
-
-}
-
-void Population::marieDeuxIndividusLigne(int p1, int p2, bitset<2500>& enfant1, bitset<2500>& enfant2){
-    int lOuC=rand()%taille;
-    int futurbool=rand()%2;
-    bool l1=(futurbool==0);
-    
-    enfant1=popul[p1];
-    enfant2=popul[p2];
-    if(l1){
-        for(int i=0; i<taille; i++){
-            enfant1[i*taille+lOuC]=popul[p2][i*taille+lOuC];
-            enfant2[i*taille+lOuC]=popul[p1][i*taille+lOuC];
-        }
-    }
-    else{
-        for(int i=0; i<taille; i++){
-            enfant1[lOuC*taille+i]=popul[p2][lOuC*taille+i];
-            enfant2[lOuC*taille+i]=popul[p1][lOuC*taille+i];
-        }
-    }
-
-}
 
 void Population::marieDeuxIndividusArbre(int finParent, int numeroSupport, mutex & m, int nbrExecution){
    
@@ -333,7 +282,6 @@ void Population::nouvelleGeneration(int nbMariage){
 void Population::descenteDerniereGeneration(){
     for(int i=0; i<nbrIndividu; i++){
         support[0].fromBitset(popul[i]);
-     //   support.descenteLocaleLimitee(time);
         support[0].VND();
         popul[i]=support[0].getCapteurs();
         valeurIndiv[i]=support[0].getNbCapteurs();
@@ -365,7 +313,7 @@ bool Population::pivote(int pointX1, int pointY1, int pointX2, int pointY2, vect
 }
 
 
-static int Population::intRand(const int & min, const int & max) {
+int Population::intRand(const int & min, const int & max) {
     static thread_local mt19937* generator = nullptr;  
     hash<thread::id> hasher;
     if (!generator) generator = new mt19937(clock() + hasher(this_thread::get_id()));
