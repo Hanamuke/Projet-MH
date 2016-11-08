@@ -7,16 +7,16 @@
 \contentsline {section}{\numberline {1}Heuristique}{6}
 \contentsline {subsection}{\numberline {1.1}Heuristique d\IeC {\'e}terministe}{6}
 \contentsline {subsection}{\numberline {1.2}Heuristique al\IeC {\'e}atoire}{7}
-\contentsline {section}{\numberline {2}Les cha\IeC {\^\i }nes d'exclusion}{9}
-\contentsline {subsection}{\numberline {2.1}D\IeC {\'e}finition}{9}
-\contentsline {subsubsection}{\numberline {2.1.1}D\IeC {\'e}finition g\IeC {\'e}n\IeC {\'e}rale}{9}
+\contentsline {section}{\numberline {2}Les cha\IeC {\^\i }nes d'exclusion}{8}
+\contentsline {subsection}{\numberline {2.1}D\IeC {\'e}finition}{8}
+\contentsline {subsubsection}{\numberline {2.1.1}D\IeC {\'e}finition g\IeC {\'e}n\IeC {\'e}rale}{8}
 \contentsline {subsubsection}{\numberline {2.1.2}Dans le probl\IeC {\`e}me de couverture connexe dans un r\IeC {\'e}seau de capteurs}{9}
-\contentsline {paragraph}{D\IeC {\'e}monstration}{10}
+\contentsline {paragraph}{D\IeC {\'e}monstration}{9}
 \contentsline {subsection}{\numberline {2.2}Propri\IeC {\'e}t\IeC {\'e}s}{10}
 \contentsline {subsubsection}{\numberline {2.2.1}Cha\IeC {\^\i }nes d'exclusion et solutions non d\IeC {\'e}g\IeC {\'e}n\IeC {\'e}r\IeC {\'e}es}{10}
 \contentsline {paragraph}{Solution d\IeC {\'e}g\IeC {\'e}n\IeC {\'e}r\IeC {\'e}e}{10}
-\contentsline {paragraph}{Construction d'une cha\IeC {\^\i }ne d'exclusion g\IeC {\'e}n\IeC {\'e}ratrice}{11}
-\contentsline {subsubsection}{\numberline {2.2.2}Cha\IeC {\^\i }nes \IeC {\'e}quivalentes}{12}
+\contentsline {paragraph}{Construction d'une cha\IeC {\^\i }ne d'exclusion g\IeC {\'e}n\IeC {\'e}ratrice}{10}
+\contentsline {subsubsection}{\numberline {2.2.2}Cha\IeC {\^\i }nes \IeC {\'e}quivalentes}{11}
 \contentsline {section}{\numberline {3}Voisinage induit}{12}
 \contentsline {subsection}{\numberline {3.1}D\IeC {\'e}finition et propri\IeC {\'e}t\IeC {\'e}s}{12}
 \contentsline {subsection}{\numberline {3.2}Exemple}{13}

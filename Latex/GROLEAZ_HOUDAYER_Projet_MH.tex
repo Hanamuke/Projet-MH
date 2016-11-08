@@ -11,7 +11,7 @@
 \@addtoreset{subsection}{part}
 \@addtoreset{subsubsection}{part}
 \makeatother
-\title{Projet Méta-heuristique (MPRO) : Couverture connexe minimum dans les réseaux des capteurs}
+\title{Projet Méta-heuristiques (MPRO) : Couverture connexe minimum dans les réseaux de capteurs}
 \author{Groleaz Lucas \\ Houdayer Antoine}
 
 \begin{document}
@@ -19,13 +19,13 @@
 \tableofcontents
 \part{Sujet}
 \section{Modélisation}
-Dans tous le problème, on cherche à placer des capteurs sur une grille de façon optimale. Autrement dit, on peut placer des capteurs sur les points à coordonnées entières qui sont à l'intérieur d'une zone prédéfinie. Dans toute la suite on travaillera sur des grilles carrées, pour alléger les notations. On notera $n$ la dimension de la grille. Ainsi chaque sommet $v$ de la grille est un élément de $V=[\![1,n]\!]\times [\![1,n]\!]$. On notera $S\subset V$ l'ensemble des somment sur lesquels on a choisi de placer un capteur, c'est notre façon d'encoder la solution.
+Dans tous le problème, on cherche à placer des capteurs sur une grille de façon optimale. Autrement dit, on peut placer des capteurs sur les points à coordonnées entières qui sont à l'intérieur d'une zone prédéfinie. Dans toute la suite on travaillera sur des grilles carrées, pour alléger les notations. On notera $n$ la dimension de la grille. Ainsi chaque sommet $v$ de la grille est un élément de $V=[\![1,n]\!]\times [\![1,n]\!]$. On notera $S\subset V$ l'ensemble des sommets sur lesquels on a choisi de placer un capteur, c'est notre façon d'encoder la solution.
 
 Chaque capteur est doté d'un rayon de captation $R_{capt}$, et d'un rayon de communication $R_{comm}\geq R_{capt}$.  On souhaite utiliser un minimum de capteurs tout en respectant deux contraintes.
 \begin{itemize}
 \item Contrainte de connexité : La grille est doté d'un puits, point de coordonnées $(1;1)$. Un capteur peut communiquer avec tout capteur ou avec le puits, à condition qu'il soit séparé de ce dernier d'une distance inférieure ou égale à $R_{comm}$. Tout capteur doit pouvoir communiquer avec le puits, soit directement, soit par l'intermédiaire d'autres capteurs. 
 
-\item Contrainte de couverture : Tout sommet de la grille, excepté le puits, doit être à une distance inférieure ou égal à $R_{capt}$ du capteur le plus proche.
+\item Contrainte de couverture : Tout sommet de la grille, excepté le puits, doit être à une distance inférieure ou égale à $R_{capt}$ du capteur le plus proche.
 
 \end{itemize}
 
@@ -37,17 +37,17 @@ Chaque capteur est doté d'un rayon de captation $R_{capt}$, et d'un rayon de co
 \end{figure}
 
 N.B: Il n'est pas interdit de couvrir le puits (ce qui est même inévitable si $R_{capt}=R_{comm}$), ou d'y placer un capteur, mais l'expérience montre qu'il n'est pas intéressant en pratique de placer un capteur dans un coin de la grille. Comme le puits est un point particulier, on doit appliquer un traitement particulier aux capteurs que l'on place dessus.
- Notamment, si on enlève un capteur situé sur le puits, les autre capteurs continuent de communiquer avec le puits. De plus avec les nombreuses rotations et symétries possibles, il faudrait que toutes les solutions optimales aient des capteurs aux quatre coins pour qu'interdire un capteur sur le puits soit impactant. Ainsi, nous avons pris le parti de ne pas mettre de capteur sur le puits. Bien sur, il faut toujours envisager cette option dans les parties théoriques. 
+ Notamment, si on enlève un capteur situé sur le puits, les autres capteurs continuent de communiquer avec le puits. De plus avec les nombreuses rotations et symétries possibles, il faudrait que toutes les solutions optimales aient des capteurs aux quatre coins pour qu'interdire un capteur sur le puits soit impactant. Ainsi, nous avons pris le parti de ne pas mettre de capteur sur le puits. Bien sûr, il faut toujours envisager cette option dans les parties théoriques. 
 
 \section{Reformulation}
 Nous avons adopté une reformulation du problème à base de graphes, un pour chaque contrainte. On note $p=(1;1)$, le puits. 
-Pour une solution $S$ donnée, non nécessairement réalisable, on défini les ensembles d'arêtes $E_{capt}(S)$, l'en semble des liens de captations, et $E_{comm}(S)$ l'ensemble des liens de communication. Formellement on a :
-\[E_{capt}(S)=\{\{v_1,v_2\}|v_1\in V\setminus p,\,v_2\in S\setminus v_1,\, \Delta(v_1,v_2)\leq R_{capt}\}\] 
+Pour une solution $S$ donnée, non nécessairement réalisable, on défini les ensembles d'arêtes $E_{capt}(S)$, l'ensemble des liens de captations, et $E_{comm}(S)$ l'ensemble des liens de communication. Formellement on a :
+\[E_{capt}(S)=\{\{v_1,v_2\}|v_1\in V,\,v_2\in S\setminus v_1,\, \Delta(v_1,v_2)\leq R_{capt}\}\] 
 \[E_{comm}(S)=\{\{v_1,v_2\}|v_1,\,v_2\in S\cup \{p\},\ v_1\neq v_2,\,\Delta(v_1,v_2)\leq R_{comm}\}\] 
 On peut alors construire les graphes correspondants:
 \[G_{capt}(S)=(V,E_{capt}(S))\]
 \[G_{comm}(S)=(S\cup p,E_{comm}(S))\]
-Ci-dessus, une illustration dans le cas $n=4$, $R_{capt}=1$, $R_{comm}=2$. On a laissé tous les sommets de $S$ sur le schéma pour plus de lisibilité.
+Ci-dessous, une illustration dans le cas $n=4$, $R_{capt}=1$, $R_{comm}=2$. On a laissé tous les sommets de $S$ sur le schéma pour plus de lisibilité.
 \begin{figure}[!h]
 \center
 \includegraphics[scale=1]{Images/4_1_2_captgraph.jpg}
@@ -68,7 +68,7 @@ Nous avons choisi d'utiliser le langage $C++$ pour tenter d'implémenter une mé
 
 Pour garder en mémoire quels sont les sommets sur lesquels un capteur est placé, le sommets captés, et les capteurs appartenant à la composant connexe du puits dans $G_{comm}(S)$, nous utilisons trois tableaux de bits de type bitset. Leurs principaux avantages sont leur faible occupation de mémoire, mais surtout la possibilité de les manipuler grâce à des opérations binaires. En contrepartie, leur taille doit être fixée à la compilation. Nous les avons déclarés de taille $2500$, pour traiter des grilles ayant moins de $2500$ sommets. Nous aurions du utiliser des vector<bool> pour pouvoir traiter des problèmes de taille arbitraire, mais en perdant la possibilité de faire des opérations binaires.
 
-Nous gardons également en mémoire en permanence, les graphes $G_{comm}(S)$ et $G_{capt}(S)$, encodés comme étant pour chaque sommet, une liste de ses voisins dans le graphe, c'est-à-dire comme un tableau de listes de sommets. Pour être tout à fait rigoureux, plutôt que la structure "list" de la bibliothèque standard, nous avons créé une structure nommée GreedyList constitué d'un tableau pré-alloué associé à un compteur d'éléments. Ainsi, on évite les coûts de désallocation et allocation, principalement lors de la copie d'objets, gagnant un temps non négligeable. Ces graphes sont tout à fait  adaptés à la structure du problème et permettent d'être performant lors du calcul d'un nouvel état obtenu par suppression ou ajout d'un capteur. Il suffit pour cela de précalculer les deux graphes suivants : 
+Nous gardons également en mémoire en permanence, les graphes $G_{comm}(S)$ et $G_{capt}(S)$, encodés comme étant pour chaque sommet, une liste de ses voisins dans le graphe, c'est-à-dire comme un tableau de listes de sommets. Pour être tout à fait rigoureux, plutôt que la structure "list" de la bibliothèque standard, nous avons créé une structure nommée GreedyList constituée d'un tableau pré-alloué associé à un compteur d'éléments. Ainsi, on évite les coûts de désallocation et allocation, principalement lors de la copie d'objets, économisant un temps non négligeable. Ces graphes sont tout à fait  adaptés à la structure du problème et permettent d'être performant lors du calcul d'un nouvel état obtenu par suppression ou ajout d'un capteur. Il suffit pour cela de précalculer les deux graphes suivants : 
 \[G_{capt}=G_{capt}(V)\]
  le graphe de tous les liens de captation possibles, et
 \[G_{comm}=G_{comm}(V)\] 
@@ -97,7 +97,7 @@ Procédons dans l'ordre, ligne par ligne :  on peut enlever la première ligne s
 Si l'on note les sommets par leur indice $k=n(i-1)+(j-1)$ plutôt que par leurs coordonnées $(i;j)$, pour plus de concision, on obtient
 \[S=\{4,5,6,7,11,13,14,15\}\]
 
-A première vue, cette heuristique présente de quelques défauts, et assez peu de qualités. Tout d'abord cette heuristique est chronophage : on essaye de retirer un à un les capteurs (initialement au nombre de $n^2$), ce qui implique d'effectuer un parcours en profondeur des sommets restants pour vérifier la connexité. Le coût de construction d'une telle solution est donc de $O(n^4)$. Deuxièmement, la structure induite par une telle construction est peu désirable en pratique, sauf justement dans le cas $R_{capt}=R_{comm}=1$, on obtient en général des solutions de qualité médiocre. Elle a toutefois l'avantage d'être implémentée en seulement quatre lignes de code. Elle a également l'avantage de garantir que la solution obtenue est réalisable. 
+À première vue, cette heuristique présente de quelques défauts, et assez peu de qualités. Tout d'abord cette heuristique est chronophage : on essaye de retirer un à un les capteurs (initialement au nombre de $n^2$), ce qui implique d'effectuer un parcours en profondeur des sommets restants pour vérifier la connexité. Le coût de construction d'une telle solution est donc de $O(n^4)$. Deuxièmement, la structure induite par une telle construction est peu désirable en pratique, on obtient en général des solutions de qualité médiocre. Elle a toutefois l'avantage d'être implémentée en seulement quatre lignes de code. Elle a également l'avantage de garantir que la solution obtenue est réalisable. 
 \subsection{Heuristique aléatoire} 
 On peut apporter à cette heuristique une très simple amélioration ,visant à briser la structure induite par la méthode déterministe. Pour cela, il suffit de remarquer que la solution obtenue est très dépendante de l'ordre dans lequel on a essayé de retirer les sommets (ligne par ligne dans l'exemple). On choisit alors au hasard un ordre dans lequel on va retirer les capteurs, c'est-à-dire une permutation des sommets. Par exemple si on tire au hasard la permutation suivante : \[0,10,11,12,13,5,8,15,9,6,4,3,14,1,2,7\] on obtiendra le résultat représenté sur la figure ci-dessous.
 \begin{figure}[h]
@@ -108,7 +108,6 @@ On peut apporter à cette heuristique une très simple amélioration ,visant à 
 
 Bien sûr, cela ne garantit pas l'obtention d'une meilleur solution mais donne effectivement des solutions meilleures en moyenne que celles de l'heuristique déterministe, pour une instance quelconque. En annexe est fourni un jeu de résultats obtenus sur les instances de test.
 
-\newpage
 
 \section{Les chaînes d'exclusion}
 \subsection{Définition}
@@ -117,18 +116,20 @@ Dans notre problème, $S$ représente un ensemble de sommets. Au début de la m�
 \subsubsection{Définition générale}
 Soit $(P)$ un problème d'optimisation réalisable (dont l'ensemble des solutions réalisables est non vide), dont chaque solution réalisable ou non peut être encodée par un ensemble $S\subset \Sigma \;\text{fini}$, et dont tout $S\subset \Sigma$ encode une solution. On peut donc confondre solutions et sous-ensembles de $\Sigma$. On exige également que $(P)$  vérifie la propriété de transitivité suivante :
 \[\forall S,S'\subset \Sigma,S\subset S',S \;\text{réalisable} \Rightarrow  S'\;\text{réalisable}\]
-Autrement dit, en ajoutant un élément à une solution réalisable, on obtient une solution elle aussi réalisable. Comme $(P)$ est réalisable, on déduit de la propriété de transitivité que $\Sigma$ est réalisable. On défini alors l'ensemble des chaînes d'exclusion $L$ comme étant l'ensemble des permutations de $\Sigma$ (on rappelle que $\Sigma$ est fini). Pour tout $l\in L$, pour tout $k\in[\![1;|\Sigma |]\!]$, $l(k)$ est alors un élément de $\Sigma$.
+ou de façon équivalente
+\[\forall v \in \Sigma\setminus S, S \text{ réalisable} \Rightarrow S\cup v \text{ réalisable} \]
+Autrement dit , en ajoutant un élément à une solution réalisable, on obtient une solution elle aussi réalisable. Comme $(P)$ est réalisable, on déduit de la propriété de transitivité que $\Sigma$ est réalisable. On défini alors l'ensemble des chaînes d'exclusion $L$ comme étant l'ensemble des permutations de $\Sigma$ (on rappelle que $\Sigma$ est fini). Pour tout $l\in L$, pour tout $k\in[\![1;|\Sigma |]\!]$, $l(k)$ est alors un élément de $\Sigma$.
 
 Pour tout $l\in L$, on défini alors la solution engendrée par $l$, notée $S(l)$. $S(l)$ est construit récursivement, à partir de la solution $S_0(l)=\Sigma$ suivant la relation de récurrence suivante : $S_{k}(l)=S_{k-1}(l)\setminus l(k)$ si $S_{k-1}(l)\setminus l(k)$ est une solution réalisable, et $S_{k}(l)=S_{k-1}(l)$ sinon, pour tout $k\in[\![1;|\Sigma |]\!]$. On prend alors $S(l)=S_{|\Sigma |}(l)$, le dernier élément de la suite. Par construction, $S(l)$ est donc réalisable pour tout $l\in L$. Nous verrons ci-après deux propriétés des chaînes d'exclusion, et pourquoi la propriété de transitivité est cruciale.  
 
 N.B.:Il est tout à fait possible de transposer cette définition pour un problème vérifiant la propriété de transitivité inverse, pour un problème dans lequel on part de $S_0=\emptyset$ auquel on essaye d'inclure des éléments, comme par exemple pour le problème de sac à dos.
 
 \subsubsection{Dans le problème de couverture connexe dans un réseau de capteurs}
-Dans notre problème, $\Sigma$ est l'ensemble $V$ de sommets. $S\subset \Sigma$ représente l'ensemble des sommets sur lesquels un capteur est placé, on a donc bien équivalence solution / sous-ensemble de sommets. Démontrons alors que la propriété de transitivité est vérifiée.
+Dans notre problème, $\Sigma$ est l'ensemble $V$ des sommets. $S\subset \Sigma$ représente l'ensemble des sommets sur lesquels un capteur est placé, on a donc bien équivalence solution / sous-ensemble de sommets. Démontrons alors que la propriété de transitivité est vérifiée.
 \paragraph{Démonstration}
-Soit $S$ une solution réalisable. Soit $v \in V$ tel que $v\notin   S$. Montrons que $S'=S\cup v$ est réalisable. On doit montrer que les contraintes de couverture et de connexité de $S'$ sont vérifiées.
+Si $\Sigma$ est la seule solution réalisable, la transitivité est triviale. Sinon, soit $S\neq \Sigma$ une solution réalisable. Soit $v \in V$ tel que $v\notin   S$. Montrons que $S'=S\cup v$ est réalisable. On doit montrer que les contraintes de couverture et de connexité de $S'$ sont vérifiées.
 
-Trivialement, la contrainte de couverture est toujours vérifiée. En effet, ajouter un capteur à $S$ a pour effet d'ajouter des arêtes dans $G_{capt}(S)$. Ainsi $G_{capt}(S)\subset G_{capt}(S')$. Ce graphe n'ayant aucun point isolé sauf le puits avant ajout d'arêtes vérifiera toujours la propriété après ajout. 
+Trivialement, la contrainte de couverture est toujours vérifiée. En effet, ajouter un capteur à $S$ a pour effet d'ajouter des arêtes dans $G_{capt}(S)$. Ainsi $G_{capt}(S)\subset G_{capt}(S')$. Le graphe n'ayant aucun point isolé sauf le puits avant ajout d'arêtes vérifiera toujours la propriété après ajout. 
 
 Montrons maintenant que $G_{comm}(S')$ est connexe. Il suffit pour cela que $v$ puisse se connecter à $G_{comm}(S)$, i.e. qu'il existe une arrête dans $G_{comm}$ entre $v$ et un sommet de $S$. Comme la propriété de couverture est respectée pour $S$, il existe une arrête dans $G_{capt}$ entre $v$ et un sommet de $S$. Or, $R_{capt}\leq R_{comm}$, ce qui implique $G_{capt}\subset G_{comm}$. Autrement dit, à chaque lien possible de captation correspond un lien de communication. Un nouveau capteur $v$ pourra donc se connecter par le même lien qui lui permettait d'être capté avant l'ajout du capteur.
 
@@ -149,11 +150,12 @@ On a alors le lemme suivant :
 Démonstration par l'absurde : 
 \\Soit $l$ une chaîne d'exclusion telle que $S(l)$ soit dégénérée. 
 \\Soit $v\in S(l)$ tel que $S(l)\setminus v$ soit réalisable.
-\\$v$ était nécessaire lorsqu'il a été rencontré dans $l$ (puisqu'il est présent dans $S(l)$) mais est devenu amovible plus tard dans la construction de $S$ (puisqu'il est amovible dans $S(l)$). Il existe donc une étape de la construction $x$ tel que $S_{x-1}(l)\setminus v$ n'est pas réalisable mais $S_x(l)\setminus v$ est réalisable, i.e. $v$ est devenu amovible à l'étape $x$ de la construction. Or, $S_x(l)\subset S_{x-1}(l)$ par construction et donc a fortiori $S_x(l)\setminus v \subset S_{x-1}(l)\setminus v$. La propriété de transitivité n'est donc pas respectée.
+\\Soit $k$ tel que $l(k)=v$.
+Nécessairement puisque $v\in S(l)$, $S_{k-1}(l)\setminus v$ n'est pas réalisable. Or par construction $S(l)\subset S_{k-1}(l)$ et donc a fortiori $S(l)\setminus v \subset S_{k-1}(l)\setminus v$. La propriété de transitivité n'est donc pas respectée.
 On en déduit alors bien que $S(l)$ est nécessairement non dégénérée.
 
 \paragraph{Construction d'une chaîne d'exclusion génératrice}
-Soit $S$ une solution quelconque, réalisable ou non. On définit alors $l^c$ comme étant la liste dans un ordre arbitraire des  $v\in \Sigma$ pour lesquels $v\in S$. De même on définit $l^e$ comme étant la liste dans un ordre arbitraire des $v\in \Sigma$ pour lesquels $v\notin S$. On note $l^e+l^c$ la concaténation de ces deux listes (avec $l^e$ en premier). Par définition $l^e+l^c$ contient une et une seule fois tous les éléments de $\Sigma$, et est donc bien une chaîne d'exclusion. On observe alors la propriétés suivantes:
+Soit $S$ une solution quelconque, réalisable ou non. On définit alors $l^c$ comme étant la liste dans un ordre arbitraire des  $v\in \Sigma$ pour lesquels $v\in S$. De même on définit $l^e$ comme étant la liste dans un ordre arbitraire des $v\in \Sigma$ pour lesquels $v\notin S$. On note $l^e+l^c$ la concaténation de ces deux listes (avec $l^e$ en premier). Par définition $l^e+l^c$ contient une et une seule fois tous les éléments de $\Sigma$, et est donc bien une chaîne d'exclusion. On observe alors la propriété suivante:
 
 \[S=S(l^e+l^c) \Leftrightarrow S\;\text{est non dégénérée}\]
 
@@ -162,30 +164,30 @@ Démonstration :
 
 Le sens direct est une conséquence immédiate du lemme. En effet il énonce que $S(l^e+l^c)$ est non dégénérée. Il faut donc montrer le sens indirect.
 
-Expliquons d'abord l'essence de cette propriété. On souhaite montrer que si on dispose d'une solution non dégénérée $S$, on est capable de construire une chaîne d'exclusion qui l'engendre. Le raisonnement est le suivant : je part de $S_0=\Sigma$, et je souhaite exclure des éléments de $\Sigma$ un à un pour aboutir à $S$, en passant uniquement par des solutions réalisables. Il va de soi que si j'arrive à enlever tous les éléments de $l^e$, j'aurais atteint $S$, et je ne pourrais enlever aucun élément de $l^c$ puisque $S$ est non dégénérée. Il suffit donc de montrer que quel que soit l'ordre dans lequel j'essaie d'enlever les éléments de $l^e$, je ne passerais que par des solutions réalisables. Nous allons pour cela démontrer le cheminement inverse :  si je part de $S$ et que j'ajoute les capteurs manquants dans un ordre arbitraire, je ne passerais que par des solutions réalisables. Récursivement, il suffit donc de montrer qu'en ajoutant un capteur à une solution réalisable, j'obtiens encore une solution réalisable. Il s'agit de la propriété de transitivité. La propriété de construction est donc démontrée.
+Expliquons d'abord l'essence de cette implication. On souhaite montrer que si on dispose d'une solution non dégénérée $S$, on est capable de construire une chaîne d'exclusion qui l'engendre. Le raisonnement est le suivant : je part de $S_0=\Sigma$, et je souhaite exclure des éléments de $\Sigma$ un à un pour aboutir à $S$, en passant uniquement par des solutions réalisables. Il va de soi que si j'arrive à enlever tous les éléments de $l^e$, j'aurais atteint $S$, et je ne pourrais enlever aucun élément de $l^c$ puisque $S$ est non dégénérée. Il suffit donc de montrer que quel que soit l'ordre dans lequel j'essaie d'enlever les éléments de $l^e$, je ne passerais que par des solutions réalisables. Nous allons pour cela démontrer le cheminement inverse :  si je part de $S$ et que j'ajoute les capteurs manquants dans un ordre arbitraire, je ne passerais que par des solutions réalisables. Récursivement, il suffit donc de montrer qu'en ajoutant un capteur à une solution réalisable, j'obtiens encore une solution réalisable. Il s'agit de la propriété de transitivité. La propriété de construction est donc démontrée.
+
+On peut déduire de la propriété de construction la propriété plus faible de caractérisation d'une solution non dégénérée suivante
+\[S\text{ non dégénérée} \Leftrightarrow \exists l\in L, S(l)=S\]
+
+On a donc démontré que pour chaque solution non dégénérée on pouvait construire facilement une chaîne d'exclusion qui la génère, et donc qu'il en existe une. On peut donc en toute légitimité encoder un solution non dégénérée par une de ses chaînes d'exclusion. Supposons maintenant que le retrait d'éléments dans $S$ améliore toujours la fonction objectif (dans un sens ou dans l'autre suivant si l'on maximise ou minimise), les solutions optimales sont alors non dégénérées et les solution non dégénérées sont en un sens des optimums locaux. Moralement on démontre que les chaînes d'exclusion sont adaptés pour résoudre un problème qui vérifierait cela, tel que le problème de couverture connexe minimum.  
 
 
+Remarque : Je notais précédemment que notre implémentation du problème de couverture connexe permettait de traiter des variantes avec d'autres définitions de distance. On voit ici que la propriété de construction (et les méthodes qui en découlent) n'est vraie que si la propriété de transitivité est vraie. Or on l'a vu, cette propriété découle de $G_{capt}\subset G_{comm}$. En particulier, il serait impossible de travailler avec cette méthode si on avait $R_{comm}<R_{capt}$.
 
-On a donc démontré que pour chaque solution non dégénérée on pouvait construire facilement une chaîne d'exclusion qui la génère, et donc qu'il en existe une. On peut donc en toute légitimité encoder un solution non dégénérée par une de ses chaînes d'exclusion. Supposons maintenant que le retrait d'éléments dans $S$ améliore toujours la fonction objectif (dans un sens ou dans l'autre suivant si l'on maximise ou minimise), les solution optimales sont alors non dégénérées et les solution non dégénérées sont en un sens des optimums locaux. Moralement on démontre que les chaînes d'exclusion sont adaptés pour résoudre un problème qui vérifierait cela, tel que le problème de couverture connexe minimum.  
-
-
-Remarque : Je notais précédemment que notre implémentation du problème de couverture connexe permettait de traiter des variantes avec d'autres définitions de distance. On voit ici que la propriété de construction (et les méthodes qui en découlent) n'est vraie que si la propriété de transitivité est vraie. Or on l'a vu, cette propriété découle de $G_{capt}\subset G_{comm}$ et donc de $R_{capt}\leq R_{comm}$. Il serait donc impossible de travailler avec cette méthode si on avait $R_{comm}<R_{capt}$.
 \subsubsection{Chaînes équivalentes}
 On retourne désormais sur le problème de couverture connexe minimale.
-\\Lorsqu'on code une solution quelconque, pas forcément réalisable, avec son vecteur binaire, il découle immédiatement que pour une grille de dimension $n$, il existe $2^{n^2}$ solutions possible. De plus, seulement une partie infime de ces solutions, les solution non dégénérées, peut être associée à une chaîne d'exclusion.
+\\Lorsqu'on code une solution quelconque, pas forcément réalisable, avec son vecteur binaire, il découle immédiatement que pour une grille de dimension $n$, il existe $2^{n^2}$ solutions possibles. De plus, seulement une partie infime de ces solutions, les solutions non dégénérées, peut être associée à une chaîne d'exclusion.
 
-Or, une chaîne d'exclusion étant essentiellement une permutation, il existe $n^2!\gg 2^{n^2}$ chaînes d'exclusion. On en déduit qu'il existe nécessairement pour chaque chaîne d'exclusion un nombre colossal de chaînes d'exclusion équivalentes, c'est-à-dire engendrant la même solution.
+Or, une chaîne d'exclusion étant essentiellement une permutation, il existe $n^2!\gg 2^{n^2}$ chaînes d'exclusion. On en déduit qu'il existe probablement pour chaque chaîne d'exclusion un nombre colossal de chaînes d'exclusion équivalentes, c'est-à-dire engendrant la même solution.
 
 En particulier, on a vu que toute chaîne d'exclusion engendre une solution non dégénérée, et que de cette solution on peut reconstruire une chaîne l'engendrant, en utilisant la partition $S$ et $V\setminus S$ , l'ordre étant sans importance.
 
 
-D'un point de vue encodage d'une solution, on peut donc voir une chaîne d'exclusion comme une partition des sommets entre $S$ et $V\setminus S$ (il faut cependant appliquer la chaîne d'exclusion pour connaître la partition qu'elle encode).
-
 \section{Voisinage induit}
 \subsection{Définition et propriétés}
-Lorsque qu'on cherche une structure de voisinage, on chercher un façon qui fait sens de modifier légèrement le vecteur qui encode la solution. Par exemple dans le problème du sac à dos, on peut essayer d'ajouter un objet dans le sac, quitte à appliquer après une heuristique de réparation. Dans notre problème on souhaiterait par exemple déplacer légèrement un capteur, ou en supprimer quelques uns. Il n'est cependant pas facile de faire une heuristique de réparation assez efficace pour avoir une meilleure solution après.
+Lorsque qu'on cherche une structure de voisinage, on cherche une façon qui fait sens de modifier légèrement le vecteur qui encode la solution. Par exemple dans le problème du sac à dos, on peut essayer d'ajouter un objet dans le sac, quitte à appliquer après une heuristique de réparation. Dans notre problème on souhaiterait par exemple déplacer légèrement un capteur, ou en supprimer quelques uns. Il n'est cependant pas facile de faire une heuristique de réparation assez efficace pour avoir une meilleure solution après.
 
-C'est là qu'est la force des chaînes d'exclusion : en appliquant une légère modification à une chaîne d'exclusion et en l'appliquant, on obtient une solution S légèrement modifiée, réalisable mais surtout non dégénérée! Autrement dit, en un sens, on peut facilement créer un voisinage dans lequel toutes les solution sont "de qualité".
+C'est là qu'est la force des chaînes d'exclusion : en appliquant une légère modification à une chaîne d'exclusion et en l'appliquant, on obtient une solution S légèrement modifiée, réalisable mais surtout non dégénérée! Autrement dit, en un sens, on peut facilement créer un voisinage dans lequel toutes les solutions sont "de qualité".
 
 Le voisinage utilisé par la suite est le suivant :
 Soit $S$ une solution. On construit les suites $l^e$ et $l^c$, puis on les mélange aléatoirement. On choisit au hasard un élément de $l^c$, qu'on retire de $l^c$ pour le mettre au début de $l^e$. On appelle $l'^e$ et $l'^c$ les suites ainsi obtenues. On construit alors une nouvelle solution $S'$ à partir de $l'=l'^e+l'^c$.
@@ -233,9 +235,9 @@ Le principal défaut réside dans le temps de calcul nécessaire pour générer 
 
 Remarques : La taille du voisinage est démesurée, il est déconseillé d'appliquer des technique de parcours méthodique telles que la recherche de voisinages améliorants, ou la recherche avec tabous. Dans la section suivante, on l'utilise dans l'algorithme du recuit simulé.
 \section{Recuit simulé}
-Pour obtenir une solution approchée de qualité, nous avons utilisé ce voisinage avec la méta-heuristique de recuit simulé. Le nombre d'itérations par palier de température à été choisi proportionnel au nombre de capteurs utilisés. Le problème de notre voisinage étant déjà la vitesse on a pris $0.85$ comme paramètre de décroissance de la température. La différence entre une solution et celles de son voisinages étant typiquement de l'ordre de l'unité, l'expérience confirme qu'il est inutile de commencer avec une température initiale supérieure à $1$. Les principaux réglages sont donc, le coefficient de proportionnalité $K$ entre le nombre de capteurs et le nombre d'itérations, ainsi que les critère d'arrêt.
+Pour obtenir une solution approchée de qualité, nous avons utilisé ce voisinage avec la méta-heuristique de recuit simulé. Le nombre d'itérations par palier de température à été choisi proportionnel au nombre de capteurs utilisés. Le problème de notre voisinage étant déjà la vitesse on a pris $0.85$ comme paramètre de décroissance de la température. La différence entre une solution et celles de son voisinages étant typiquement de l'ordre de l'unité, l'expérience confirme qu'il est inutile de commencer avec une température initiale supérieure à $1$. Les principaux réglages sont donc, le coefficient de proportionnalité $K$ entre le nombre de capteurs et le nombre d'itérations, ainsi que les critères d'arrêt.
 
-Concernant les critère d'arrêts, on impose de descendre à une température inférieure à $0.1$. On s'arrête alors lorsqu'on ne parvient pas à améliorer le résultat pendant deux paliers de température consécutifs.
+Concernant les critères d'arrêt, on impose de descendre à une température inférieure à $0.1$. On s'arrête alors lorsqu'on ne parvient pas à améliorer le résultat pendant deux paliers de température consécutifs.
 
 En annexe des jeux de résultats pour $K=1.25$ et pour $K=5$.
 \section{Optimisation}
@@ -244,22 +246,22 @@ On souhaite éviter de faire un parcours en profondeur total à chaque fois que 
 
 Une des caractéristique des chaînes d'exclusion est que l'on est jamais dans un état non réalisable. La seule question que l'on se pose est donc, étant donné un graphe connexe, y a-t-il un moyen de savoir facilement si le graphe est toujours connexe après retrait d'un sommet. 
 
-Soit $k$ le sommet que l'on veut retirer. Il suffit de savoir si tous les voisins de $k$ (au sens de la communication) ont toujours un chemin les reliant au puits.
+Soit $k$ le sommet que l'on veut retirer. Il suffit de savoir si tous les voisins de $k$ (au sens de la communication) ont un chemin les reliant au puits n'utilisant pas $k$.
 
 Pour cela on définit la fonction $\Delta$ par $\Delta (k)$ est la longueur du plus court chemin reliant $k$ au puits. Soit $k'$ un voisin de $k$. 
 
 Si $\Delta(k')\leq \Delta(k)$, nécessairement il existe un chemin qui relie $k'$ au puits sans passer par $k$. Si $\Delta(k')=\Delta(k)+1$, mais qu'il existe un voisin $k''$ de $k'$ tel que $k''\neq k$ et $\Delta(k'')=\Delta(k)$, alors on peut rejoindre le puits depuis $k'$ par $k''$ plutôt que par $k$, sans que cela affecte la distance de $k'$ au puits. Si tous les voisins de $k$ vérifient une de ces deux propriétés, alors on peut supprimer $k$ sans compromettre la connexité, mais aussi sans changer la valeur de $\Delta$ pour les autres sommets. La suppression de $k$ est donc très peu coûteuse. 
 
-Maintenant, supposons qu'un des voisins $k'$ de $k$ ne vérifie pas ces propriétés. Il y a alors deux cas de figures, il est possible qu'il existe un chemin qui va relier $k'$ au puits, mais il faudra alors mettre à jour la distance de $k'$ mais aussi du reste du graphe (dans l'hypothèse bien sur qu'on supprime $k$ au final). Cela peut être fait en explorant seulement les sommets dont la valeur change, de façon intelligente. Il est également possible qu'on ne puisse pas relier $k'$ au puits, auquel cas on ne supprimera pas $k$.
+Maintenant, supposons qu'un des voisins $k'$ de $k$ ne vérifie pas ces propriétés. Il y a alors deux cas de figure. Il est possible qu'il existe un chemin qui va relier $k'$ au puits, mais il faudra alors mettre à jour la distance de $k'$ mais aussi du reste du graphe (dans l'hypothèse bien sur qu'on supprime $k$ au final). Cela peut être fait en explorant seulement les sommets dont la valeur change, de façon intelligente. Il est également possible qu'on ne puisse pas relier $k'$ au puits, auquel cas on ne supprimera pas $k$.
 
 Dans ces deux cas, il faut faire un parcours en profondeur en partant de $k'$ pour départager. On s'arrêtera dès qu'on rencontre un capteur différent de $k$ à même distance du puits que $k$. 
 
-Dans les deux cas, lors du parcours en profondeur partant de $k'$ on peut stocker diverses informations quand à la forme du graphe. En particulier, on peut noter lorsqu'on rencontre un feuille, qui sera forcement amovible si on la rencontre plus tard. On peut remarquer que si tous les voisins d'un sommet autre que celui d'où on vient sont des racines d'arbres, alors le sommet est inamovible. Il ne pourra pas devenir amovible par la suite comme on sait que toute chaîne d'exclusion génère une solution non dégénérée.
+Dans les deux cas, lors du parcours en profondeur partant de $k'$ on peut stocker diverses informations quant à la forme du graphe. En particulier, on peut noter lorsqu'on rencontre une feuille, qui sera forcement amovible si on la rencontre plus tard (la couverture étant conservée bien sûr). On peut remarquer que si tous les voisins d'un sommet autre que celui d'où on vient sont des racines d'arbres, alors le sommet est inamovible. Il ne pourra pas devenir amovible par la suite comme on sait que toute chaîne d'exclusion génère une solution non dégénérée.
 
 Résumons les différents cas de figure, dans l'ordre
 \begin{itemize}
-\item Si la contrainte de couverture est violée (rapide à vérifier), on ne fait rien.
 \item Si le sommet a été montré inamovible précédemment, on ne fait rien.
+\item Si la contrainte de couverture est violée (rapide à vérifier), on ne fait rien.
 \item Si la suppression du sommet n'affecte pas les distance, on peut le supprimer rapidement.
 \item On effectue alors un parcours en profondeur : Si un des voisins du sommet ne peut pas se reconnecter (parcours en profondeur complet), on ne fait rien, mais on a acquis des informations utiles sur les parties du graphe qui sont des arbres.
 \item Si on arrive à reconnecter tous les voisins (le parcours en profondeur est écourté), on a des informations utiles, on supprime $k$ et on met à jour les distances à moindre coût. 
@@ -285,7 +287,7 @@ On considère qu'il n'y a pas de capteur sur le puits. La grille initial est la 
 \end{tabular}
 \end{center}
 
-Considérons le capteur d'indice $9$, c'est-à-dire le capteurs $(3;2)$. Il est situé à distance $3$ du puits. Il a deux voisins à distance $2$ qui ne posent pas problème, et deux voisins à distance $4$ mais qui ont tous deux un autre voisin à distance $3$. On peut donc supprimer le capteur d'indice $9$ sans faire de calculs coûteux, et aucune distance n'est modifiée. On obtient la grille suivante.
+Considérons le capteur d'indice $9$, c'est-à-dire le capteur $(3;2)$. Il est situé à distance $3$ du puits. Il a deux voisins à distance $2$ qui ne posent pas problème, et deux voisins à distance $4$ mais qui ont tous deux un autre voisin à distance $3$. On peut donc supprimer le capteur d'indice $9$ sans faire de calculs coûteux, et aucune distance n'est modifiée. On obtient la grille suivante.
 
 \begin{center}
 \begin{tabular}{|c|c|c|c|}
@@ -352,18 +354,18 @@ $1_i$ & 2 & 3 & $4_i$ \\
 \end{tabular} 
 \end{center}
 
-Ne ne ferons pas l'exemple en entier mais si ici on voulait enlever le capteur d'indice $5$, on se rendrait que c'est impossible car il faut couvrir $1$ (il n'y a pas de capteur sur le puits), sans faire quelque parcours.
+Ne ne ferons pas l'exemple en entier mais si ici on voulait enlever le capteur d'indice $5$, on se rendrait compte que c'est impossible car il faut couvrir $1$ (il n'y a pas de capteur sur le puits), sans faire quelque parcours.
 \section{Parallélisation}
 Nous avons essayé de paralléliser l'algorithme de recuit simulé. Chaque thread calcul alors un voisinage de la solution en cours. La principale question est donc de savoir sous quelle condition faire changer la solution en cours. 
 
-La solution la plus simple est que chaque thread travaille indépendamment sur sa propre solution en cours, i.e. chaque thread effectue un recuit simulé et on conserve la meilleure solution à la fin. Cependant on voit dans l'annexe que l'écart type des solutions d'un recuit simulé est d'environ $2$, de façon peu dépendante du temps de calcul. Il est donc à prévoir et on vérifie par l'expérience que cette implémentation n'apporte qu'une amélioration de $3-4$ en moyenne.
+La solution la plus simple est que chaque thread travaille indépendamment sur sa propre solution en cours, i.e. chaque thread effectue un recuit simulé et on conserve la meilleure solution à la fin. Cependant on voit dans l'annexe que l'écart type des solutions d'un recuit simulé est d'environ $2$, de façon peu dépendante du temps de calcul. Il est donc à prévoir et on vérifie par l'expérience que cette implémentation n'apporte qu'une amélioration de $3-4$ en moyenne pour un même $K$.
 
-La deuxième solution relativement simple est de laisser chaque thread évoluer indépendamment jusqu'à l'obtention d'une solution améliorante, on synchronise alors chaque thread sur cette solution. Nous avons obtenu des résultats satisfaisant avec cette technique. Cependant à cause de la même remarque que pour la technique précédente, on peut penser que l'efficacité des threads en recherche indépendante est limitée.
+La deuxième solution relativement simple est de laisser chaque thread évoluer indépendamment jusqu'à l'obtention d'une solution améliorante, on synchronise alors chaque thread sur cette solution. Nous avons obtenu des résultats satisfaisants avec cette technique. Cependant à cause de la même remarque que pour la technique précédente, on peut penser que l'efficacité des threads en recherche indépendante est limitée.
 
-La troisième solution est de laisser les threads chercher indépendamment jusqu'à ce que l'un d'entre eux trouve une solution qu'il veut accepter (pas forcément améliorante). On interromps alors le calcul des autres threads pour les synchrniser avec cette nouvelle solution. Cependant il est n'est possible en pratique d'imposer tant de synchronisation entre les threads, on leur laisse alors finir leurs calculs et ils se synchroniseront d'eux-mêmes si la solution en cours a changée depuis le dernier passage (grâce à un système de flags), abandonnant alors le calcul qu'ils ont fait. Bien sûr, une solution améliorante est toujours conservée en priorité sur les autres.
-\\Au premier abord il semblerait que beaucoup de temps de calcul est gaspillé avec cette mais elle obtient les meilleurs résultats en pratique (voir annexe). On peut peut-être interpréter cela comme étant le  résultat d'un meilleure synergie entre les threads, comme ils cherchent dans une direction plus commune, la recherche est plus organisée en somme.
+La troisième solution est de laisser les threads chercher indépendamment jusqu'à ce que l'un d'entre eux trouve une solution qu'il veut accepter (pas forcément améliorante). On interromps alors le calcul des autres threads pour les synchroniser avec cette nouvelle solution. Cependant il n'est pas possible en pratique d'imposer tant de synchronisation entre les threads, on leur laisse alors finir leurs calculs et ils se synchroniseront d'eux-mêmes si la solution en cours a changée depuis le dernier passage (grâce à un système de flags), abandonnant alors le calcul qu'ils ont fait. Bien sûr, une solution améliorante est toujours conservée en priorité sur les autres.
+\\Au premier abord il semblerait que beaucoup de temps de calcul est gaspillé avec cette technique mais elle obtient les meilleurs résultats en pratique (voir annexe). On peut peut-être interpréter cela comme étant le  résultat d'un meilleure synergie entre les threads, comme ils cherchent dans une direction plus commune, la recherche est plus organisée en somme.
 
-N.B: Les test ont été effectués sous les même conditions d'arrêts et de température que les tests sans parallélisation. Seul le coefficient de proportionnalité entre nombre de capteurs et nombre d'itérations par palier $K$ varie. 
+N.B: Les tests ont été effectués sous les même conditions d'arrêts et de température que les tests sans parallélisation. Seul le coefficient de proportionnalité entre nombre de capteurs et nombre d'itérations par palier $K$ varie. 
 \part{Annexe}
 Tous les résultats sont donnés en nombre de capteurs, en colonne $n$ et les paires $(R_{capt};R_{comm})$ sur les lignes.
 
@@ -389,9 +391,11 @@ Ci-dessous les bornes inférieures calculées à partir des surface en nombres d
 \end{tabular} 
 \end{center}
 
-Tout les tests portant sur l'approche par chaînes d'exclusion ont été effectués sur une machine GE60-0ND équipée d'un i7-3630QM 2.40GHz. 6Go de mémoire RAM étaient disponibles mais en pratique seulement quelques Mo sont nécessaires.
+Tout les tests portants sur l'approche par chaînes d'exclusion ont été effectués sur une machine GE60-0ND équipée d'un i7-3630QM 2.40GHz. 6Go de mémoire RAM étaient disponibles mais en pratique seulement quelques Mo sont nécessaires.
 
 Résultats de l'heuristique destructrice aléatoire. Ces résultats sont produits d'aléa, et fluctuent légèrement d'un exécution à l'autre. Cette heuristique n'est pas vraiment censée être performante d'elle même, les chaînes d'exclusion ont vraiment été pensées pour les voisinages qu'elles produisent, et donc pour être utilisées avec le recuit simulé. 
+
+N.B.: Le temps de calcul est omis car négligeable.
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|c|c|}
 \hline
