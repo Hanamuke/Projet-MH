@@ -38,7 +38,7 @@ public:
     //Effectue une descente locale sur tous les individus (non utilisée)
     void descenteDerniereGeneration();
     //Effectue une rotation d'angle pi/2 de centre (X1,Y1) des capteurs dans anciennePositions, puis place les capteurs avec pour centre X2,Y2
-    bool pivote(int pointX1, int pointY1, int pointX2, int pointY2, vector<pair<int,int>>& anciennePosition, vector<pair<int,int>>& nouvel,YlePosition);
+    bool pivote(int pointX1, int pointY1, int pointX2, int pointY2, vector<pair<int,int>>& anciennePosition, vector<pair<int,int>>& nouvellePosition);
     //Genere des solutions aléatoires 
     void genereSolution(int nombre, int numeroSupport, mutex & m);
     //Renvoie un nombre aléatoire, de mainère thread safe
