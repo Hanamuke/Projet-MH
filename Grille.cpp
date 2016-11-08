@@ -333,7 +333,7 @@ string Grille::toString() const
 	string ret="Position des capteurs\n";
 	for(int i=0; i<taille; i++){
 		for(int j=0; j<taille; j++){
-			ret+=capteurs[i*taille+j]?"1 ":"0 ";
+			ret+=capteurs[i*taille+j]?" \u25aa":" \u25a1";
 		}
 		ret+='\n';
 	}
@@ -1057,21 +1057,22 @@ double Grille::structureValue()
 		{
 			if(capteurs.test(taille*i+j))
 			{
-				cntrow[i]++;
 				cntfile[j]++;
+				cntrow[i]++;
 			}
 		}
 	}
-	double value=0;
+	double valueline=0;
+	double valuerow=0;
 	for(int i=0; i<taille; i++)
 	{
-		value+=pow(cntfile[i],2);
-		value+=pow(cntrow[i],2);
+		valueline+=pow(cntfile[i]-mean,2);
+		valuerow+=pow(cntrow[i]-mean,2);
 	}
-	value/=(double)(2*taille);
-	value-=(double)pow(mean,2);
+	double value=max(valueline,valuerow);
+	value/=(double)(taille);
 	value=sqrt(value);
-	value/=(double)mean;
+	value/=pow(mean,2);
 	return value;
 }
 void Grille::fromBitset(bitset<2500>& capt){

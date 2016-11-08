@@ -59,7 +59,7 @@ void Grille::thread_recuit(array<bool,8> & flag_this, array<bool,8> & flag_T,dou
         cntcapt++;
     }
     N=nbCapteurs;
-    k=N*0.25;
+    k=N*5;
     //////////
     Grille g(taille, rCapt,rCom);
     m.unlock();
@@ -67,15 +67,15 @@ void Grille::thread_recuit(array<bool,8> & flag_this, array<bool,8> & flag_T,dou
     {
         for(int i=0; i<k; i++)
         {
-            k=ceil(N*0.25);
+            k=ceil(N*5);
             int pivot=gen[id]()%N; //tirage au sort du capteur à enlever
             //shuffle des listes de capteurs et de non capteur :  pas certain que ce soit thread safe mais j'ai pas eu de problèmes
             random_shuffle(empty.begin(),empty.begin()+taille*taille-1-N);
             random_shuffle(capt.begin(),capt.begin()+N);
             g.pivotDestructeur(capt,empty,temp_capt,temp_empty,capt[pivot]);//génération de la nouvelle solution
-            m.lock(); /////// SECTION CRITIQUE
             double lambda=exp((double)(N-g.getNbCapteurs())/T);
             int p=100*lambda;
+            m.lock(); /////// SECTION CRITIQUE
             if(g.getNbCapteurs()<best.getNbCapteurs()) // si on a trouvé une solution améliorante on met a jour
             {
                 capt=temp_capt;
